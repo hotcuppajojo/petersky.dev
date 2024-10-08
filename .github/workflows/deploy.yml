@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -21,11 +22,21 @@ jobs:
       - name: Install Leptos CLI
         run: cargo install --locked cargo-leptos
 
-      - name: Build Leptos site
-        run: cargo leptos build --release
+      - name: Install Trunk for static assets
+        run: cargo install trunk
+
+      - name: Build Leptos site for CSR with Trunk
+        run: trunk build --release
 
       - name: Move build output to root
         run: mv target/site/pkg/* target/site/
+
+      - name: Create index.html for deployment
+        run: |
+          echo '<!DOCTYPE html>' > target/site/index.html
+          echo '<html lang="en">' >> target/site/index.html
+          echo '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Petersky Dev</title><link rel="stylesheet" href="pkg/petersky-dev.css"></head>' >> target/site/index.html
+          echo '<body><div id="root"></div><script type="module" src="pkg/petersky-dev.js"></script></body></html>' >> target/site/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

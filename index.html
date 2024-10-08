@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petersky Dev</title>
+    <link rel="stylesheet" href="pkg/petersky-dev.css">
+    <!-- Add this line to specify the binary -->
+    <link data-trunk rel="rust" data-bin="petersky-dev" />
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+        import init from './pkg/petersky-dev.js';
+        init().then(() => {
+            console.log("Leptos app initialized");
+        });
+    </script>
+</body>
+</html>

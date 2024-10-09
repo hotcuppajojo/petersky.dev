@@ -27,8 +27,7 @@ jobs:
             rust-toolchain-${{ runner.os }}-
 
       # 3. Only install the Rust toolchain if it is not cached.
-      - name: Install Rust toolchain
-        if: steps.rust-cache.outputs.cache-hit != 'true'
+      - name: Install Rust toolchain and wasm32 target
         run: |
           rustup toolchain install stable
           rustup default stable
@@ -39,12 +38,12 @@ jobs:
       - name: Cache Cargo registry and index
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
+         path: |
+           ~/.cargo/registry
+           ~/.cargo/git
+         key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+         restore-keys: |
+           cargo-${{ runner.os }}-
 
       # 5. Cache Leptos CLI installation
       - name: Cache Leptos CLI
@@ -56,35 +55,12 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 6. Check if Leptos CLI cache was hit
-      - name: Check Leptos CLI Cache
-        env:
-          LEPTOS_CACHE_HIT: ${{ steps.leptos-cache.outputs.cache-hit }}
-        run: | 
-            echo "Leptos CLI cache hit: $LEPTOS_CACHE_HIT"
-
-      # 7. Install Leptos CLI only if not cached
+      # 6. Install Leptos CLI only if not cached
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 7.5 Debug step to confirm the Leptos CLI installation path
-      - name: List ~/.cargo/bin after Leptos install
-        run: ls -l ~/.cargo/bin
-
-      # 8. Manually cache the installed Leptos CLI
-      - name: Save Leptos CLI cache
-        if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: |
-          if [ -f ~/.cargo/bin/cargo-leptos ]; then
-            mkdir -p ~/.cargo/bin
-            cp ~/.cargo/bin/cargo-leptos ~/.cargo/bin/leptos_cache
-          else
-            echo "Leptos CLI not found, skipping cache save."
-            exit 1
-          fi
-
-      # 9. Cache Trunk for static site generation
+      # 7. Cache Trunk for static site generation
       - name: Cache Trunk
         id: trunk-cache
         uses: actions/cache@v3
@@ -94,24 +70,24 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 10. Install Trunk for static site generation
+      # 8. Install Trunk if not cached
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 11. Ensure the target/site directory exists before the build process.
+      # 9. Ensure the target/site directory exists before the build process.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 12. Build the Leptos app using Trunk
+      # 10. Build the Leptos app using Trunk
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 13. Debug step to list output directory contents
+      # 11. Debug step to list output directory contents
       - name: List build output directory
         run: ls -R target/site
 
-      # 14. Check for output files and move them to the root
+      # 13. Check for output files and move them to the root
       - name: Move build output to root
         run: |
           if [ ! -d "target/site" ]; then
@@ -120,7 +96,7 @@ jobs:
           fi
           rsync -a target/site/ target/site/
 
-      # 15. Generate the index.html dynamically for deployment
+      # 14. Generate the index.html dynamically for deployment
       - name: Create index.html for deployment
         run: |
           cat > target/site/index.html <<EOF
@@ -139,7 +115,7 @@ jobs:
           </html>
           EOF
 
-      # 16. Deploy to GitHub Pages
+      # 15. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

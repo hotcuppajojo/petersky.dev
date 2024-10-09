@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Always check out the latest commit in the repository.
-      #    Ensures the workflow uses the current state of the 'main' branch.
+      # 1. Check out the latest code from the 'main' branch.
+      #    Ensures the workflow operates on the latest code changes.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Cache the Rust toolchain for reuse across builds.
-      #    Reuses the cached toolchain if no changes are detected in 'Cargo.lock'.
-      #    This minimizes installation time and speeds up the build process.
+      # 2. Cache the Rust toolchain to speed up builds.
+      #    Reuse the toolchain if 'Cargo.lock' hasn't changed.
+      #    This reduces toolchain installation time.
       - name: Cache Rust toolchain
         id: rust-cache
         uses: actions/cache@v4
@@ -27,29 +27,28 @@ jobs:
           restore-keys: |
             rust-toolchain-${{ runner.os }}-
 
-      # 3. Install the Rust toolchain and WASM target.
-      #    This step runs regardless of the cache status to ensure necessary components are present.
+      # 3. Install Rust and the WebAssembly target.
+      #    Ensures all required components are available for building.
       - name: Install Rust toolchain and wasm32 target
         run: |
           rustup toolchain install stable
           rustup default stable
           rustup target add wasm32-unknown-unknown
 
-      # 4. Cache the Cargo registry and index to avoid redundant downloads.
-      #    Reduces build time by caching dependencies based on the 'Cargo.lock' hash.
-      #    The cache is restored whenever a match is found, minimizing network usage.
+      # 4. Cache the Cargo registry and index to minimize network usage.
+      #    Helps avoid downloading dependencies repeatedly.
       - name: Cache Cargo registry and index
         uses: actions/cache@v4
         with:
-         path: |
-           ~/.cargo/registry
-           ~/.cargo/git
-         key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
-         restore-keys: |
-           cargo-${{ runner.os }}-
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
 
-      # 5. Cache the Leptos CLI installation to speed up subsequent runs.
-      #    Uses a version-specific cache key to ensure the correct version is restored.
+      # 5. Cache Leptos CLI to avoid reinstalling on every run.
+      #    Uses version-specific cache to ensure compatibility.
       - name: Cache Leptos CLI
         id: leptos-cache
         uses: actions/cache@v4
@@ -59,14 +58,14 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 6. Install the Leptos CLI if it was not restored from the cache.
-      #    Ensures the required CLI is available for building the project.
+      # 6. Install Leptos CLI if it's not in the cache.
+      #    Guarantees the CLI is available for the build process.
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 7. Cache the Trunk installation to avoid unnecessary reinstalls.
-      #    Improves build efficiency by caching the Trunk binary.
+      # 7. Cache Trunk to avoid unnecessary reinstalls.
+      #    Improves efficiency by storing the compiled Trunk binary.
       - name: Cache Trunk
         id: trunk-cache
         uses: actions/cache@v4
@@ -76,41 +75,26 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 8. Install Trunk if it was not restored from the cache.
-      #    Required for managing static assets and building the site.
+      # 8. Install Trunk if it's not cached.
+      #    Required for building the static site assets.
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
       # 9. Create the 'target/site' directory if it doesn't exist.
-      #    Prepares the expected directory structure for the build process.
+      #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
       # 10. Build the Leptos site using Trunk in release mode.
-      #     Generates optimized production-ready assets for deployment.
+      #     Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 11. List the contents of the build output directory.
-      #     Used for debugging to verify the generated files are in place.
-      - name: List build output directory
-        run: ls -R target/site
-
-      # 12. Check for the presence of build output and move the files if they exist.
-      #     Ensures the build succeeded and moves the output for deployment.
-      - name: Move build output to root
-        run: |
-          if [ ! -d "target/site" ]; then
-            echo "Build output not found! Exiting."
-            exit 1
-          fi
-          rsync -a target/site/ target/site/
-
-      # 13. Deploy the generated site to the 'gh-pages' branch.
-      #     Uses the GitHub Pages action to publish the contents of 'target/site'.
+      # 11. Deploy the built site to the 'gh-pages' branch.
+      #     Publishes the contents of 'target/site/pkg' to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site
+          publish_dir: ./target/site/pkg

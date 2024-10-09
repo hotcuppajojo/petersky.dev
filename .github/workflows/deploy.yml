@@ -109,7 +109,9 @@ jobs:
       # 13. Move the compiled CSS to the deployment directory if needed.
       #     Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
-        run: cp style/main.css target/site/pkg/style/
+        run: |
+          mkdir -p target/site/pkg/style
+          cp style/main.css target/site/pkg/style/
 
       # 14. Deploy the built site to the 'gh-pages' branch.
       #     Publishes the contents of 'target/site/pkg' to GitHub Pages.

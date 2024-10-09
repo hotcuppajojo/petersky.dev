@@ -26,16 +26,26 @@ jobs:
           key: rust-toolchain-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             rust-toolchain-${{ runner.os }}-
+      
+      # 3. Remove existing installations of rust-analyzer, rustfmt, and cargo-fmt if they are not managed by rustup.
+      #    This ensures the tools are managed by rustup for future updates.
+      - name: Clean up existing Rust tools
+        run: |
+          rm -f ~/.cargo/bin/rust-analyzer
+          rm -f ~/.cargo/bin/rustfmt
+          rm -f ~/.cargo/bin/cargo-fmt
 
-      # 3. Install Rust and the WebAssembly target.
+      # 4. Install Rust and the WebAssembly target.
       #    Ensures all required components are available for building.
       - name: Install Rust toolchain and wasm32 target
         run: |
           rustup toolchain install stable
           rustup default stable
+          rustup component add rust-analyzer
+          rustup component add rustfmt
           rustup target add wasm32-unknown-unknown
 
-      # 4. Cache the Cargo registry and index to minimize network usage.
+      # 5. Cache the Cargo registry and index to minimize network usage.
       #    Helps avoid downloading dependencies repeatedly.
       - name: Cache Cargo registry and index
         uses: actions/cache@v4
@@ -47,7 +57,7 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
 
-      # 5. Cache Leptos CLI to avoid reinstalling on every run.
+      # 6. Cache Leptos CLI to avoid reinstalling on every run.
       #    Uses version-specific cache to ensure compatibility.
       - name: Cache Leptos CLI
         id: leptos-cache
@@ -58,13 +68,13 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 6. Install Leptos CLI if it's not in the cache.
+      # 7. Install Leptos CLI if it's not in the cache.
       #    Guarantees the CLI is available for the build process.
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 7. Cache Trunk to avoid unnecessary reinstalls.
+      # 8. Cache Trunk to avoid unnecessary reinstalls.
       #    Improves efficiency by storing the compiled Trunk binary.
       - name: Cache Trunk
         id: trunk-cache
@@ -75,23 +85,23 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 8. Install Trunk if it's not cached.
+      # 9. Install Trunk if it's not cached.
       #    Required for building the static site assets.
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 9. Create the 'target/site' directory if it doesn't exist.
+      # 10. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 10. Build the Leptos site using Trunk in release mode.
+      # 11. Build the Leptos site using Trunk in release mode.
       #     Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 11. Deploy the built site to the 'gh-pages' branch.
+      # 12. Deploy the built site to the 'gh-pages' branch.
       #     Publishes the contents of 'target/site/pkg' to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

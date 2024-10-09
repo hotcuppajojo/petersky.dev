@@ -13,14 +13,14 @@ jobs:
       # 1. Always check out the latest commit in the repository.
       #    Ensures the workflow uses the current state of the 'main' branch.
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Cache the Rust toolchain for reuse across builds.
       #    Reuses the cached toolchain if no changes are detected in 'Cargo.lock'.
       #    This minimizes installation time and speeds up the build process.
       - name: Cache Rust toolchain
         id: rust-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo
           key: rust-toolchain-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
@@ -39,7 +39,7 @@ jobs:
       #    Reduces build time by caching dependencies based on the 'Cargo.lock' hash.
       #    The cache is restored whenever a match is found, minimizing network usage.
       - name: Cache Cargo registry and index
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
          path: |
            ~/.cargo/registry
@@ -52,7 +52,7 @@ jobs:
       #    Uses a version-specific cache key to ensure the correct version is restored.
       - name: Cache Leptos CLI
         id: leptos-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-leptos
           key: leptos-cli-${{ runner.os }}-v0.6.15
@@ -69,7 +69,7 @@ jobs:
       #    Improves build efficiency by caching the Trunk binary.
       - name: Cache Trunk
         id: trunk-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
           key: trunk-cli-${{ runner.os }}-v0.20.3
@@ -107,30 +107,10 @@ jobs:
           fi
           rsync -a target/site/ target/site/
 
-      # 13. Dynamically generate an 'index.html' file for deployment.
-      #     Creates a minimal HTML file that loads the built assets.
-      - name: Create index.html for deployment
-        run: |
-          cat > target/site/index.html <<EOF
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Petersky Dev</title>
-              <link rel="stylesheet" href="pkg/petersky-dev.css">
-          </head>
-          <body>
-              <div id="root"></div>
-              <script type="module" src="pkg/petersky-dev.js"></script>
-          </body>
-          </html>
-          EOF
-
-      # 14. Deploy the generated site to the 'gh-pages' branch.
+      # 13. Deploy the generated site to the 'gh-pages' branch.
       #     Uses the GitHub Pages action to publish the contents of 'target/site'.
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/site

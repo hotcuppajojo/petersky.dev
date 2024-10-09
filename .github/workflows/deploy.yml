@@ -58,7 +58,10 @@ jobs:
 
       # 6. Check if Leptos CLI cache was hit
       - name: Check Leptos CLI Cache
-        run: echo "Leptos CLI cache hit: ${{ steps.leptos-cache.outputs.cache-hit }}"
+        env:
+          LEPTOS_CACHE_HIT: ${{ steps.leptos-cache.outputs.cache-hit }}
+        run: | 
+            echo "Leptos CLI cache hit: $LEPTOS_CACHE_HIT"
 
       # 7. Install Leptos CLI only if not cached
       - name: Install Leptos CLI

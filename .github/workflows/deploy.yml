@@ -91,29 +91,46 @@ jobs:
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 10. Create the 'target/site' directory if it doesn't exist.
+      # 10. Cache Sass to avoid reinstalling.
+      #    Stores the Sass binary for faster compilation.
+      - name: Cache Sass
+        id: sass-cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/sass
+          key: sass-${{ runner.os }}-v1.62.1
+          restore-keys: |
+            sass-${{ runner.os }}-
+
+      # 11. Install Sass if it's not cached.
+      #    Required for compiling SCSS to CSS.
+      - name: Install Sass
+        if: steps.sass-cache.outputs.cache-hit != 'true'
+        run: sudo apt-get install -y sass
+
+      # 12. Compile SCSS to CSS.
+      #    Converts the SCSS files to CSS for the site.
+      - name: Compile SCSS
+        run: sass style/main.scss style/main.css
+
+      # 13. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 11. Build the Leptos site using Trunk in release mode.
+      # 14. Build the Leptos site using Trunk in release mode.
       #     Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 12. Check for the compiled CSS file to ensure it was built.
-      #     Lists the contents of the style directory for debugging.
-      - name: Check for Compiled CSS
-        run: ls -R style/
-
-      # 13. Move the compiled CSS to the deployment directory if needed.
+      # 15. Move the compiled CSS to the deployment directory if needed.
       #     Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
 
-      # 14. Deploy the built site to the 'gh-pages' branch.
+      # 16. Deploy the built site to the 'gh-pages' branch.
       #     Publishes the contents of 'target/site/pkg' to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

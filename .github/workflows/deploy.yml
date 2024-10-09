@@ -101,7 +101,17 @@ jobs:
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 12. Deploy the built site to the 'gh-pages' branch.
+      # 12. Check for the compiled CSS file to ensure it was built.
+      #     Lists the contents of the style directory for debugging.
+      - name: Check for Compiled CSS
+        run: ls -R style/
+
+      # 13. Move the compiled CSS to the deployment directory if needed.
+      #     Ensures the CSS file is available in the target output.
+      - name: Move Compiled CSS to Deployment Directory
+        run: cp style/main.css target/site/pkg/style/
+
+      # 14. Deploy the built site to the 'gh-pages' branch.
       #     Publishes the contents of 'target/site/pkg' to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

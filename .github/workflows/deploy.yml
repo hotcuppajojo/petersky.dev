@@ -91,13 +91,21 @@ jobs:
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
+      # 10. Query the path for Sass and save it as an environment variable.
+      #     Debug step that may be removed in the final workflow.
+      - name: Query Sass path and save as environment variable
+        id: query-sass-path
+        run: |
+          SASS_PATH=$(npm root -g || echo "~/.npm")
+          echo "SASS_PATH=$SASS_PATH" >> $GITHUB_ENV
+          
       # 10. Cache Sass to avoid reinstalling.
       #    Stores the Sass binary for faster compilation.
       - name: Cache Sass
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: ${{ env.SASS_PATH }}
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-

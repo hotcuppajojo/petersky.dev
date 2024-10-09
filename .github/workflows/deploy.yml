@@ -10,13 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Always check out the latest commit in the repository
+      # 1. Always check out the latest commit in the repository.
+      #    Ensures the workflow uses the current state of the 'main' branch.
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Cache the Rust toolchain to avoid redundant installation
-      #    The cache key depends on the OS and Rust toolchain version; the cache is reused
-      #    as long as the `Cargo.lock` file remains unchanged. This speeds up build times.
+      # 2. Cache the Rust toolchain for reuse across builds.
+      #    Reuses the cached toolchain if no changes are detected in 'Cargo.lock'.
+      #    This minimizes installation time and speeds up the build process.
       - name: Cache Rust toolchain
         id: rust-cache
         uses: actions/cache@v3
@@ -26,15 +27,17 @@ jobs:
           restore-keys: |
             rust-toolchain-${{ runner.os }}-
 
-      # 3. Only install the Rust toolchain if it is not cached.
+      # 3. Install the Rust toolchain and WASM target.
+      #    This step runs regardless of the cache status to ensure necessary components are present.
       - name: Install Rust toolchain and wasm32 target
         run: |
           rustup toolchain install stable
           rustup default stable
           rustup target add wasm32-unknown-unknown
 
-      # 4. Cache the Cargo registry and index for package management efficiency.
-      #    Cache invalidation occurs when `Cargo.lock` changes, indicating a dependency update.
+      # 4. Cache the Cargo registry and index to avoid redundant downloads.
+      #    Reduces build time by caching dependencies based on the 'Cargo.lock' hash.
+      #    The cache is restored whenever a match is found, minimizing network usage.
       - name: Cache Cargo registry and index
         uses: actions/cache@v3
         with:
@@ -45,7 +48,8 @@ jobs:
          restore-keys: |
            cargo-${{ runner.os }}-
 
-      # 5. Cache Leptos CLI installation
+      # 5. Cache the Leptos CLI installation to speed up subsequent runs.
+      #    Uses a version-specific cache key to ensure the correct version is restored.
       - name: Cache Leptos CLI
         id: leptos-cache
         uses: actions/cache@v3
@@ -55,12 +59,14 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 6. Install Leptos CLI only if not cached
+      # 6. Install the Leptos CLI if it was not restored from the cache.
+      #    Ensures the required CLI is available for building the project.
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 7. Cache Trunk for static site generation
+      # 7. Cache the Trunk installation to avoid unnecessary reinstalls.
+      #    Improves build efficiency by caching the Trunk binary.
       - name: Cache Trunk
         id: trunk-cache
         uses: actions/cache@v3
@@ -70,24 +76,29 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 8. Install Trunk if not cached
+      # 8. Install Trunk if it was not restored from the cache.
+      #    Required for managing static assets and building the site.
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 9. Ensure the target/site directory exists before the build process.
+      # 9. Create the 'target/site' directory if it doesn't exist.
+      #    Prepares the expected directory structure for the build process.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 10. Build the Leptos app using Trunk
+      # 10. Build the Leptos site using Trunk in release mode.
+      #     Generates optimized production-ready assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 11. Debug step to list output directory contents
+      # 11. List the contents of the build output directory.
+      #     Used for debugging to verify the generated files are in place.
       - name: List build output directory
         run: ls -R target/site
 
-      # 13. Check for output files and move them to the root
+      # 12. Check for the presence of build output and move the files if they exist.
+      #     Ensures the build succeeded and moves the output for deployment.
       - name: Move build output to root
         run: |
           if [ ! -d "target/site" ]; then
@@ -96,7 +107,8 @@ jobs:
           fi
           rsync -a target/site/ target/site/
 
-      # 14. Generate the index.html dynamically for deployment
+      # 13. Dynamically generate an 'index.html' file for deployment.
+      #     Creates a minimal HTML file that loads the built assets.
       - name: Create index.html for deployment
         run: |
           cat > target/site/index.html <<EOF
@@ -115,7 +127,8 @@ jobs:
           </html>
           EOF
 
-      # 15. Deploy to GitHub Pages
+      # 14. Deploy the generated site to the 'gh-pages' branch.
+      #     Uses the GitHub Pages action to publish the contents of 'target/site'.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Petersky Dev</title>
-    <link rel="stylesheet" href="pkg/petersky-dev.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto+Mono:wght@100..700&display=swap">
+    <title>JoJo Petersky Dev</title>
+    <link rel="stylesheet" href="style/main.css">
     
-<script type="module" nonce="UmTWWsLKHm8ZIm0tF6k6Xg==">
+<script type="module" nonce="cTNj4SIoTHWKAnw+u24ImA==">
 import init, * as bindings from '/petersky-dev-572e195913b8cc8b.js';
 const wasm = await init('/petersky-dev-572e195913b8cc8b_bg.wasm');
 
@@ -18,79 +18,41 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-    <style>
-        body {
-            background-color: #0d0d0d;
-            color: #00ff99;
-            font-family: 'Roboto Mono', monospace;
-        }
-        #root {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1, h2, h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: #ff00ff;
-        }
-        a {
-            color: #00ffff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        /* Additional cyberpunk-inspired styles */
-        .neon-text {
-            text-shadow: 0 0 5px #00ff99, 0 0 10px #00ff99, 0 0 15px #00ff99;
-        }
-        .glow-button {
-            border: 2px solid #ff00ff;
-            background: transparent;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #ff00ff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .glow-button:hover {
-            background: #ff00ff;
-            color: #0d0d0d;
-            box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
-        }
-    </style>
 
 <link rel="modulepreload" href="/petersky-dev-572e195913b8cc8b.js" crossorigin=anonymous integrity="sha384-cFUegYwH1BACHvAwIUZKLuLEm9+1CCaSmwKppeKx2AmNSGTM+AzvTcNrZynNQRWo">
 <link rel="preload" href="/petersky-dev-572e195913b8cc8b_bg.wasm" crossorigin=anonymous integrity="sha384-qb0gpOx0ES7PZdWZG4+180XI6EAFqHakTSpyn3CafTHI3Pglc6CIoL4sG+ecLMET" as="fetch" type="application/wasm"></head>
 <body>
-    <div id="root">
+    <div id="site-viewport">
         <header>
             <h1 class="neon-text">JoJo Petersky Dev</h1>
             <nav>
-                <a href="/about">About</a> |
-                <a href="/blog">Blog</a> |
-                <a href="/portfolio">Portfolio</a>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/posts">Blog</a></li>
+                    <li><a href="/portfolio">Portfolio</a></li>
+                </ul>
             </nav>
         </header>
+        
         <main>
-            <section>
+            <section class="hero">
                 <h2>Welcome to My Cyberpunk World</h2>
                 <p>Explore my journey in software engineering, web development, and cutting-edge tech.</p>
             </section>
-            <section>
+            
+            <section class="recent-posts">
                 <h3>Recent Posts</h3>
-                <div class="blog-posts">
-                    <article>
-                        <h4><a href="/posts/my-latest-project">My Latest Project</a></h4>
-                        <p>A dive into my recent work on automated vision testing.</p>
-                    </article>
-                    <article>
-                        <h4><a href="/posts/cyberpunk-ui">Creating a Cyberpunk UI</a></h4>
-                        <p>How I achieved a futuristic look and feel with modern web tools.</p>
-                    </article>
-                </div>
+                <article>
+                    <h4>My Latest Project</h4>
+                    <p>A dive into my recent work on automated vision testing.</p>
+                </article>
+                <article>
+                    <h4>Creating a Cyberpunk UI</h4>
+                    <p>How I achieved a futuristic look and feel with modern web tools.</p>
+                </article>
             </section>
         </main>
+        
         <footer>
             <p>© 2024 JoJo Petersky | Built with Leptos</p>
         </footer>

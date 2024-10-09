@@ -1,0 +1,7 @@
+[build]
+dist = "target/site"  # This sets the output folder for the build
+public_url = "/"      # The base URL where your site will be hosted
+
+[watch]
+# Optional: Specify directories or files to watch during development
+paths = ["src", "assets"]

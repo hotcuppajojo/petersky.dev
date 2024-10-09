@@ -11,14 +11,12 @@ jobs:
 
     steps:
       # 1. Always check out the latest commit in the repository
-      #    We rely on the repository's state to trigger conditional steps based on changes.
       - name: Checkout repository
         uses: actions/checkout@v3
 
       # 2. Cache the Rust toolchain to avoid redundant installation
       #    The cache key depends on the OS and Rust toolchain version; the cache is reused
-      #    as long as the `Cargo.lock` file remains unchanged. This speeds up build times
-      #    by ensuring the Rust toolchain is only installed if necessary.
+      #    as long as the `Cargo.lock` file remains unchanged. This speeds up build times.
       - name: Cache Rust toolchain
         uses: actions/cache@v3
         with:
@@ -28,7 +26,6 @@ jobs:
             rust-toolchain-${{ runner.os }}-
 
       # 3. Only install the Rust toolchain if it is not cached.
-      #    Installing the Rust toolchain is redundant unless the cache is missing or invalidated.
       - name: Install Rust toolchain
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -37,8 +34,7 @@ jobs:
           rustup target add wasm32-unknown-unknown
 
       # 4. Cache the Cargo registry and index for package management efficiency.
-      #    Cargo dependencies often remain stable across builds, so caching avoids repeated
-      #    downloads. Cache invalidation occurs when `Cargo.lock` changes, indicating a dependency update.
+      #    Cache invalidation occurs when `Cargo.lock` changes, indicating a dependency update.
       - name: Cache Cargo registry and index
         uses: actions/cache@v3
         with:
@@ -49,40 +45,70 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
 
-      # 5. Install Leptos CLI once if needed.
-      #    Leptos is critical for building the app but doesn't need to be reinstalled if it's already cached.
+      # 5. Cache Leptos CLI installation
+      #    Leptos CLI does not need to be reinstalled if already cached.
+      - name: Cache Leptos CLI
+        uses: actions/cache@v3
+        with:
+            path: ~/.cargo/bin/leptos
+            key: leptos-cli-${{ runner.os }}-v0.6.15
+            restore-keys: |
+                leptos-cli-${{ runner.os }}-
+
+      # 6. Install Leptos CLI only if not cached
       - name: Install Leptos CLI
         if: steps.cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
+                    
+      # 7. Cache Trunk for static site generation
+      - name: Cache Trunk
+        uses: actions/cache@v3
+        with:
+            path: ~/.cargo/bin/trunk
+            key: trunk-cli-${{ runner.os }}-v0.20.3 
+            restore-keys: |
+                trunk-cli-${{ runner.os }}-
 
-      # 6. Install Trunk for static site generation.
-      #    Trunk manages WASM assets and simplifies packaging, but it is unnecessary to reinstall
-      #    unless explicitly updated or missing.
+      # 8. Install Trunk for static site generation.
+      #    Trunk manages WASM assets and simplifies packaging, unnecessary to reinstall unless missing.
       - name: Install Trunk for static assets
         if: steps.cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 7. Build the Leptos app using Trunk.
-      #    Since we cache dependencies and the toolchain, building the app here is fast and consistent.
+      # 9. Build the Leptos app using Trunk.
+      #    Building is fast and consistent due to the cached dependencies and toolchain.
       - name: Build Leptos site for CSR with Trunk
-        run: trunk build --release
+        run: |
+            trunk build --release
+            if [ ! -d "target/site/pkg" ]; then
+                echo "Build output not found! Exiting.";
+                exit 1;
+            fi
 
-      # 8. Move built files to a root directory for ease of deployment.
-      #    Necessary to structure the output for static hosting.
+      # 10. Move built files to a root directory for ease of deployment.
       - name: Move build output to root
-        run: mv target/site/pkg/* target/site/
+        run: rsync -a target/site/pkg/ target/site/
 
-      # 9. Generate the `index.html` dynamically for deployment.
-      #    This file is critical for deployment but can be generated dynamically, ensuring flexibility and correctness.
+      # 11. Generate the `index.html` dynamically for deployment.
       - name: Create index.html for deployment
         run: |
-          echo '<!DOCTYPE html>' > target/site/index.html
-          echo '<html lang="en">' >> target/site/index.html
-          echo '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Petersky Dev</title><link rel="stylesheet" href="pkg/petersky-dev.css"></head>' >> target/site/index.html
-          echo '<body><div id="root"></div><script type="module" src="pkg/petersky-dev.js"></script></body></html>' >> target/site/index.html
+            cat > target/site/index.html <<EOF
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Petersky Dev</title>
+                <link rel="stylesheet" href="pkg/petersky-dev.css">
+            </head>
+            <body>
+                <div id="root"></div>
+                 <script type="module" src="pkg/petersky-dev.js"></script>
+            </body>
+            </html>
+            EOF
 
-      # 10. Deploy to GitHub Pages.
-      #     Deploy the built output (including the generated `index.html`) to the `gh-pages` branch, making the site live.
+      # 12. Deploy to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

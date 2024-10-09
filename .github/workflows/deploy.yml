@@ -46,69 +46,70 @@ jobs:
             cargo-${{ runner.os }}-
 
       # 5. Cache Leptos CLI installation
-      #    Leptos CLI does not need to be reinstalled if already cached.
       - name: Cache Leptos CLI
         uses: actions/cache@v3
         with:
-            path: ~/.cargo/bin/leptos
-            key: leptos-cli-${{ runner.os }}-v0.6.15
-            restore-keys: |
-                leptos-cli-${{ runner.os }}-
+          path: ~/.cargo/bin/leptos
+          key: leptos-cli-${{ runner.os }}-v0.6.15
+          restore-keys: |
+            leptos-cli-${{ runner.os }}-
 
       # 6. Install Leptos CLI only if not cached
       - name: Install Leptos CLI
         if: steps.cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
-                    
+
       # 7. Cache Trunk for static site generation
       - name: Cache Trunk
         uses: actions/cache@v3
         with:
-            path: ~/.cargo/bin/trunk
-            key: trunk-cli-${{ runner.os }}-v0.20.3 
-            restore-keys: |
-                trunk-cli-${{ runner.os }}-
+          path: ~/.cargo/bin/trunk
+          key: trunk-cli-${{ runner.os }}-v0.20.3
+          restore-keys: |
+            trunk-cli-${{ runner.os }}-
 
-      # 8. Install Trunk for static site generation.
-      #    Trunk manages WASM assets and simplifies packaging, unnecessary to reinstall unless missing.
+      # 8. Install Trunk for static site generation
       - name: Install Trunk for static assets
         if: steps.cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 9. Build the Leptos app using Trunk.
-      #    Building is fast and consistent due to the cached dependencies and toolchain.
+      # 9. Ensure the target/site directory exists before the build process.
+      - name: Ensure target/site directory exists
+        run: mkdir -p target/site
+
+      # 10. Build the Leptos app using Trunk
       - name: Build Leptos site for CSR with Trunk
         run: |
-            trunk build --release
-            if [ ! -d "target/site/pkg" ]; then
-                echo "Build output not found! Exiting.";
-                exit 1;
-            fi
+          trunk build --release
+          if [ ! -d "target/site/pkg" ]; then
+              echo "Build output not found! Exiting."
+              exit 1
+          fi
 
-      # 10. Move built files to a root directory for ease of deployment.
+      # 11. Move built files to a root directory for ease of deployment
       - name: Move build output to root
         run: rsync -a target/site/pkg/ target/site/
 
-      # 11. Generate the `index.html` dynamically for deployment.
+      # 12. Generate the index.html dynamically for deployment
       - name: Create index.html for deployment
         run: |
-            cat > target/site/index.html <<EOF
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Petersky Dev</title>
-                <link rel="stylesheet" href="pkg/petersky-dev.css">
-            </head>
-            <body>
-                <div id="root"></div>
-                 <script type="module" src="pkg/petersky-dev.js"></script>
-            </body>
-            </html>
-            EOF
+          cat > target/site/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Petersky Dev</title>
+              <link rel="stylesheet" href="pkg/petersky-dev.css">
+          </head>
+          <body>
+              <div id="root"></div>
+              <script type="module" src="pkg/petersky-dev.js"></script>
+          </body>
+          </html>
+          EOF
 
-      # 12. Deploy to GitHub Pages.
+      # 13. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

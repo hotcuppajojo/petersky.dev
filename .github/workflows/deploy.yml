@@ -18,6 +18,7 @@ jobs:
       #    The cache key depends on the OS and Rust toolchain version; the cache is reused
       #    as long as the `Cargo.lock` file remains unchanged. This speeds up build times.
       - name: Cache Rust toolchain
+        id: rust-cache
         uses: actions/cache@v3
         with:
           path: ~/.cargo
@@ -27,7 +28,7 @@ jobs:
 
       # 3. Only install the Rust toolchain if it is not cached.
       - name: Install Rust toolchain
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.rust-cache.outputs.cache-hit != 'true'
         run: |
           rustup toolchain install stable
           rustup default stable
@@ -47,6 +48,7 @@ jobs:
 
       # 5. Cache Leptos CLI installation
       - name: Cache Leptos CLI
+        id: leptos-cache
         uses: actions/cache@v3
         with:
           path: ~/.cargo/bin/leptos
@@ -56,11 +58,12 @@ jobs:
 
       # 6. Install Leptos CLI only if not cached
       - name: Install Leptos CLI
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
       # 7. Cache Trunk for static site generation
       - name: Cache Trunk
+        id: trunk-cache
         uses: actions/cache@v3
         with:
           path: ~/.cargo/bin/trunk
@@ -70,7 +73,7 @@ jobs:
 
       # 8. Install Trunk for static site generation
       - name: Install Trunk for static assets
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
       # 9. Ensure the target/site directory exists before the build process.
@@ -79,12 +82,20 @@ jobs:
 
       # 10. Build the Leptos app using Trunk
       - name: Build Leptos site for CSR with Trunk
+        run: trunk build --release
+
+      # 11. Debug step to list output directory contents
+      - name: List build output directory
+        run: ls -R target/site
+
+      # 12. Check for output files and move them to the root
+      - name: Move build output to root
         run: |
-          trunk build --release
           if [ ! -d "target/site/pkg" ]; then
-              echo "Build output not found! Exiting."
-              exit 1
+            echo "Build output not found! Exiting."
+            exit 1
           fi
+          rsync -a target/site/pkg/ target/site/
 
       # 11. Move built files to a root directory for ease of deployment
       - name: Move build output to root

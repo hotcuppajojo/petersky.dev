@@ -51,7 +51,7 @@ jobs:
         id: leptos-cache
         uses: actions/cache@v3
         with:
-          path: ~/.cargo/bin/leptos
+          path: ~/.cargo/bin/cargo-leptos
           key: leptos-cli-${{ runner.os }}-v0.6.15
           restore-keys: |
             leptos-cli-${{ runner.os }}-
@@ -76,8 +76,13 @@ jobs:
       - name: Save Leptos CLI cache
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ~/.cargo/bin
-          cp -r ~/.cargo/bin/leptos ~/.cargo/bin/leptos_cache
+          if [ -f ~/.cargo/bin/cargo-leptos ]; then
+            mkdir -p ~/.cargo/bin
+            cp ~/.cargo/bin/cargo-leptos ~/.cargo/bin/leptos_cache
+          else
+            echo "Leptos CLI not found, skipping cache save."
+            exit 1
+          fi
 
       # 9. Cache Trunk for static site generation
       - name: Cache Trunk

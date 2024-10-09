@@ -91,7 +91,7 @@ jobs:
       # 12. Check for output files and move them to the root
       - name: Move build output to root
         run: |
-          if [ ! -d "target/site/pkg" ]; then
+          if [ ! -d "target/site" ]; then
             echo "Build output not found! Exiting."
             exit 1
           fi

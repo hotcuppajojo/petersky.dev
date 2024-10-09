@@ -56,12 +56,23 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 6. Install Leptos CLI only if not cached
+      # 6. Check if Leptos CLI cache was hit
+      - name: Check Leptos CLI Cache
+        run: echo "Leptos CLI cache hit: ${{ steps.leptos-cache.outputs.cache-hit }}"
+
+      # 7. Install Leptos CLI only if not cached
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 7. Cache Trunk for static site generation
+      # 8. Manually cache the installed Leptos CLI
+      - name: Save Leptos CLI cache
+        if: steps.leptos-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.cargo/bin
+          cp -r ~/.cargo/bin/leptos ~/.cargo/bin/leptos_cache
+
+      # 9. Cache Trunk for static site generation
       - name: Cache Trunk
         id: trunk-cache
         uses: actions/cache@v3
@@ -71,37 +82,33 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 8. Install Trunk for static site generation
+      # 10. Install Trunk for static site generation
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 9. Ensure the target/site directory exists before the build process.
+      # 11. Ensure the target/site directory exists before the build process.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 10. Build the Leptos app using Trunk
+      # 12. Build the Leptos app using Trunk
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 11. Debug step to list output directory contents
+      # 13. Debug step to list output directory contents
       - name: List build output directory
         run: ls -R target/site
 
-      # 12. Check for output files and move them to the root
+      # 14. Check for output files and move them to the root
       - name: Move build output to root
         run: |
           if [ ! -d "target/site" ]; then
             echo "Build output not found! Exiting."
             exit 1
           fi
-          rsync -a target/site/pkg/ target/site/
+          rsync -a target/site/ target/site/
 
-      # 11. Move built files to a root directory for ease of deployment
-      - name: Move build output to root
-        run: rsync -a target/site/pkg/ target/site/
-
-      # 12. Generate the index.html dynamically for deployment
+      # 15. Generate the index.html dynamically for deployment
       - name: Create index.html for deployment
         run: |
           cat > target/site/index.html <<EOF
@@ -120,7 +127,7 @@ jobs:
           </html>
           EOF
 
-      # 13. Deploy to GitHub Pages
+      # 16. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

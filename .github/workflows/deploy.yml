@@ -98,6 +98,15 @@ jobs:
         run: |
           SASS_PATH=$(npm root -g || echo "~/.npm")
           echo "SASS_PATH=$SASS_PATH" >> $GITHUB_ENV
+
+      # 11 Verify Sass path status for proper cleanup.
+      #   Debug step that may be removed in the final workflow.
+      - name: Verify Sass path
+        run: |
+          if [ ! -d "${{ env.SASS_PATH }}" ]; then
+            echo "Sass path ${{ env.SASS_PATH }} does not exist. Creating it."
+            mkdir -p ${{ env.SASS_PATH }}
+          fi
           
       # 10. Cache Sass to avoid reinstalling.
       #    Stores the Sass binary for faster compilation.

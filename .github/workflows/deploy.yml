@@ -68,6 +68,10 @@ jobs:
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
+      # 7.5 Debug step to confirm the Leptos CLI installation path
+      - name: List ~/.cargo/bin after Leptos install
+        run: ls -l ~/.cargo/bin
+
       # 8. Manually cache the installed Leptos CLI
       - name: Save Leptos CLI cache
         if: steps.leptos-cache.outputs.cache-hit != 'true'

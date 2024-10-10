@@ -93,20 +93,20 @@ jobs:
 
       # 10. Query the path for Sass and save it as an environment variable.
       #     Debug step that may be removed in the final workflow.
-      - name: Query Sass path and save as environment variable
-        id: query-sass-path
-        run: |
-          SASS_PATH=$(npm root -g || echo "~/.npm")
-          echo "SASS_PATH=$SASS_PATH" >> $GITHUB_ENV
+      #- name: Query Sass path and save as environment variable
+      #  id: query-sass-path
+      #  run: |
+      #    SASS_PATH=$(npm root -g || echo "~/.npm")
+      #    echo "SASS_PATH=$SASS_PATH" >> $GITHUB_ENV
 
       # 11 Verify Sass path status for proper cleanup.
       #   Debug step that may be removed in the final workflow.
-      - name: Verify Sass path
-        run: |
-          if [ ! -d "${{ env.SASS_PATH }}" ]; then
-            echo "Sass path ${{ env.SASS_PATH }} does not exist. Creating it."
-            mkdir -p ${{ env.SASS_PATH }}
-          fi
+      #- name: Verify Sass path
+      #  run: |
+      #    if [ ! -d "${{ env.SASS_PATH }}" ]; then
+      #      echo "Sass path ${{ env.SASS_PATH }} does not exist. Creating it."
+      #      mkdir -p ${{ env.SASS_PATH }}
+      #    fi
           
       # 10. Cache Sass to avoid reinstalling.
       #    Stores the Sass binary for faster compilation.
@@ -114,7 +114,7 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.SASS_PATH }}
+          path: ~/.cargo/bin/sass
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-

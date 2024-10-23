@@ -46,8 +46,24 @@ jobs:
           rustup default stable
           rustup component add rust-analyzer
           rustup component add rustfmt
-          rustup target add wasm32-unknown-unknown
-          cargo check --target wasm32-unknown-unknown
+      
+      # 5. Cache the wasm32-unknown-unknown target to speed up builds.
+      #    Reuse the target if it hasn't changed.
+      - name: Cache wasm32 target
+        id: wasm32-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/wasm32-unknown-unknown
+          key: wasm32-target-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            wasm32-target-${{ runner.os }}-
+      
+      # 5. Install wasm32-unknown-unknown target if it's not cached.
+      #    Adds the WebAssembly target for building the site.
+      #    We need to run separate checks for the target.
+      - name: Install wasm32-unknown-unknown target
+        if: steps.wasm32-cache.outputs.cache-hit != 'true'
+        run: rustup target add wasm32-unknown-unknown
 
       # 5. Verify wasm32-unknown-unknown target installation
       #    Ensures the target is installed correctly.

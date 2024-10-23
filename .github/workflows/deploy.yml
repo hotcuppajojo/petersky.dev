@@ -109,7 +109,7 @@ jobs:
       # Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
-        run: npm install -g sass --prefix ~/.cargo
+        run: npm install -g sass --prefix ~/.cargo/bin/
 
       # 12. Compile SCSS to CSS.
       # Converts the SCSS files to CSS for the site.

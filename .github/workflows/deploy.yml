@@ -98,7 +98,7 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin
+          path: ~/.cargo/bin/sass
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-

@@ -115,22 +115,21 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin/sass
+          path: ~/.cargo/bin
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-
 
       # 11. Install Sass if it's not cached.
-      #    Required for compiling SCSS to CSS.
+      # Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
-        run: cargo install sass
-        # run: sudo npm install -g sass
+        run: npm install -g sass --prefix ~/.cargo
 
       # 12. Compile SCSS to CSS.
-      #    Converts the SCSS files to CSS for the site.
+      # Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: sass style/main.scss style/main.css
+        run: ~/.cargo/bin/sass style/main.scss style/main.css
 
       # 13. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.

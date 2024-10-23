@@ -1,32 +1,147 @@
+/* main.scss */
 body {
-  background-color: #0d0d0d;
-  color: #00ff00;
+  background-color: #000000;
+  color: #faff00;
   font-family: "Orbitron", sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#site-viewport {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 2px solid #faff00;
+}
+
+.branding {
+  text-align: left;
 }
 
 .neon-text {
-  color: #ff00ff;
-  text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  color: #faff00;
+  text-shadow: 0 0 10px #faff00, 0 0 20px #faff00, 0 0 40px #ff6700;
 }
 
-nav a {
-  color: #00ffff;
+.tagline {
+  color: #faff00;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+nav {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #00fff5;
   text-decoration: none;
-  margin: 0 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #ff6700;
 }
 
 .hero {
   text-align: center;
-  color: #ff00ff;
+  color: #faff00;
+  padding: 100px 20px;
+  background: linear-gradient(135deg, #000000 0%, #1f1f1f 100%);
+  margin-bottom: 50px;
+}
+
+.hero h2 {
+  font-size: 2.5rem;
+  text-shadow: 0 0 10px #ff6700, 0 0 20px #faff00;
+}
+
+.recent-posts {
   margin: 50px 0;
 }
 
-.recent-posts article {
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.post-card {
   background: #1a1a1a;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 10px 0;
-  color: #00ff00;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #ff6700;
+  transition: transform 0.3s ease;
+}
+
+.post-card:hover {
+  transform: scale(1.05);
+}
+
+.post-card h4 {
+  color: #faff00;
+  margin-bottom: 10px;
+}
+
+.post-card p {
+  color: #00fff5;
+}
+
+footer {
+  padding: 20px 0;
+  border-top: 2px solid #faff00;
+  text-align: center;
+  color: #00fff5;
+}
+
+.social-links a {
+  color: #00fff5;
+  margin: 0 10px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #ff6700;
+}
+
+.social-links {
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+  }
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero {
+    padding: 50px 20px;
+  }
 }
 
 /*# sourceMappingURL=main.css.map */

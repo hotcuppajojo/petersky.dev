@@ -119,7 +119,7 @@ jobs:
       # 12. Compile SCSS to CSS.
       # Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: node ~/.cargo/lib/node_modules/sass/sass.js style/main.scss style/main.css
+        run: sass style/main.scss style/main.css
 
       # 13. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.

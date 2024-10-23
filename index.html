@@ -23,25 +23,36 @@
         
         <main>
             <section class="hero">
-                <h2>Welcome to My Cyberpunk World</h2>
-                <p>Explore my journey in software engineering, web development, and cutting-edge tech.</p>
+                <div class="hero-content">
+                    <h2>Welcome to My Cyberpunk World</h2>
+                    <p>Explore my journey in software engineering, web development, and cutting-edge tech.</p>
+                </div>
             </section>
-            
+    
             <section class="recent-posts">
                 <h3>Recent Posts</h3>
-                <article>
-                    <h4>My Latest Project</h4>
-                    <p>A dive into my recent work on automated vision testing.</p>
-                </article>
-                <article>
-                    <h4>Creating a Cyberpunk UI</h4>
-                    <p>How I achieved a futuristic look and feel with modern web tools.</p>
-                </article>
+                <div class="posts-grid">
+                    <article class="post-card">
+                        <h4>My Latest Project</h4>
+                        <p>A dive into my recent work on automated vision testing.</p>
+                    </article>
+                    <article class="post-card">
+                        <h4>Creating a Cyberpunk UI</h4>
+                        <p>How I achieved a futuristic look and feel with modern web tools.</p>
+                    </article>
+                </div>
             </section>
         </main>
         
-        <footer>
-            <p>© 2024 JoJo Petersky | Built with Leptos</p>
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p>© 2024 JoJo Petersky | Built with <a href="https://leptos.dev">Leptos</a></p>
+                <div class="social-links">
+                    <a href="#"><img src="/assets/icons/github.svg" alt="GitHub"></a>
+                    <a href="#"><img src="/assets/icons/linkedin.svg" alt="LinkedIn"></a>
+                    <a href="#"><img src="/assets/icons/twitter.svg" alt="Twitter"></a>
+                </div>
+            </div>
         </footer>
     </div>
     <script type="module">

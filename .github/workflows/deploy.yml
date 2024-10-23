@@ -58,19 +58,19 @@ jobs:
           restore-keys: |
             wasm32-target-${{ runner.os }}-
       
-      # 5. Install wasm32-unknown-unknown target if it's not cached.
+      # 6. Install wasm32-unknown-unknown target if it's not cached.
       #    Adds the WebAssembly target for building the site.
       #    We need to run separate checks for the target.
       - name: Install wasm32-unknown-unknown target
         if: steps.wasm32-cache.outputs.cache-hit != 'true'
         run: rustup target add wasm32-unknown-unknown
 
-      # 5. Verify wasm32-unknown-unknown target installation
+      # 7. Verify wasm32-unknown-unknown target installation
       #    Ensures the target is installed correctly.
       - name: Verify wasm32-unknown-unknown target
         run: rustup target list --installed
 
-      # 6. Cache the Cargo registry and index to minimize network usage.
+      # 8. Cache the Cargo registry and index to minimize network usage.
       #    Helps avoid downloading dependencies repeatedly.
       - name: Cache Cargo registry and index
         uses: actions/cache@v4
@@ -82,7 +82,7 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
 
-      # 7. Cache Leptos CLI to avoid reinstalling on every run.
+      # 9. Cache Leptos CLI to avoid reinstalling on every run.
       #    Uses version-specific cache to ensure compatibility.
       - name: Cache Leptos CLI
         id: leptos-cache
@@ -93,13 +93,13 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 8. Install Leptos CLI if it's not in the cache.
+      # 10. Install Leptos CLI if it's not in the cache.
       #    Guarantees the CLI is available for the build process.
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 9. Cache Trunk to avoid unnecessary reinstalls.
+      # 11. Cache Trunk to avoid unnecessary reinstalls.
       #    Improves efficiency by storing the compiled Trunk binary.
       - name: Cache Trunk
         id: trunk-cache
@@ -110,13 +110,18 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 10. Install Trunk if it's not cached.
+      # 12. Install Trunk if it's not cached.
       #    Required for building the static site assets.
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
           
-      # 11. Cache Sass to avoid reinstalling.
+      # 13. Ensure the Sass path exists before caching.
+      #    Creates the path if it doesn't exist.
+      - name: Ensure Sass path exists
+        run: mkdir -p ~/.npm/sass
+
+      # 14. Cache Sass to avoid reinstalling.
       #    Stores the Sass binary for faster compilation.
       - name: Cache Sass
         id: sass-cache
@@ -127,40 +132,40 @@ jobs:
           restore-keys: |
             sass-${{ runner.os }}-
 
-      # 12. Install Sass if it's not cached.
+      # 15. Install Sass if it's not cached.
       # Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
         run: npm install -g sass
 
-      # 13. List globally installed npm packages
+      # 16. List globally installed npm packages
       #    Helps debug the installation path of Sass.
       - name: List globally installed npm packages
         run: npm list -g --depth=0
 
-      # 14. Compile SCSS to CSS.
+      # 17. Compile SCSS to CSS.
       # Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
         run: sass style/main.scss style/main.css
 
-      # 15. Create the 'target/site' directory if it doesn't exist.
+      # 18. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 16. Build the Leptos site using Trunk in release mode.
+      # 19. Build the Leptos site using Trunk in release mode.
       #     Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 17. Move the compiled CSS to the deployment directory if needed.
+      # 20. Move the compiled CSS to the deployment directory if needed.
       #     Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
 
-      # 18. Deploy the built site to the 'gh-pages' branch.
+      # 21. Deploy the built site to the 'gh-pages' branch.
       #     Publishes the contents of 'target/site/pkg' to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

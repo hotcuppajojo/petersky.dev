@@ -111,6 +111,11 @@ jobs:
         if: steps.sass-cache.outputs.cache-hit != 'true'
         run: npm install -g sass --prefix ~/.cargo/bin/
 
+      # 11.debug List contents of ~/.cargo/bin to verify Sass installation
+      #    Helps debug the installation path of Sass.
+      - name: List contents of ~/.cargo/bin
+        run: ls -al ~/.cargo/bin
+
       # 12. Compile SCSS to CSS.
       # Converts the SCSS files to CSS for the site.
       - name: Compile SCSS

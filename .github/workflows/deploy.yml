@@ -27,10 +27,11 @@ jobs:
           key: rust-toolchain-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             rust-toolchain-${{ runner.os }}-
-      
+
       # 3. Remove existing installations of rust-analyzer, rustfmt, and cargo-fmt if they are not managed by rustup.
       #    This ensures the tools are managed by rustup for future updates.
       - name: Clean up existing Rust tools
+        if: steps.rust-cache.outputs.cache-hit != 'true'
         run: |
           rm -f ~/.cargo/bin/rust-analyzer
           rm -f ~/.cargo/bin/rustfmt
@@ -39,6 +40,7 @@ jobs:
       # 4. Install Rust and the WebAssembly target.
       #    Ensures all required components are available for building.
       - name: Install Rust toolchain and wasm32 target
+        if: steps.rust-cache.outputs.cache-hit != 'true'
         run: |
           rustup toolchain install stable
           rustup default stable

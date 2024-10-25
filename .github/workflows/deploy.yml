@@ -37,16 +37,15 @@ jobs:
           rm -f ~/.cargo/bin/rustfmt
           rm -f ~/.cargo/bin/cargo-fmt
 
-      # 4. Install Rust and the WebAssembly target.
+      # 4. Install Rust toolchain and components.
       #    Ensures all required components are available for building.
-      - name: Install Rust toolchain and wasm32 target
-        if: steps.rust-cache.outputs.cache-hit != 'true'
+      - name: Install Rust toolchain and components
         run: |
           rustup toolchain install stable
           rustup default stable
           rustup component add rust-analyzer
           rustup component add rustfmt
-      
+
       # 5. Cache the wasm32-unknown-unknown target to speed up builds.
       #    Reuse the target if it hasn't changed.
       - name: Cache wasm32 target
@@ -57,7 +56,7 @@ jobs:
           key: wasm32-target-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             wasm32-target-${{ runner.os }}-
-      
+
       # 6. Install wasm32-unknown-unknown target if it's not cached.
       #    Adds the WebAssembly target for building the site.
       #    We need to run separate checks for the target.
@@ -115,11 +114,11 @@ jobs:
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
-          
+
       # 13. Ensure the Sass path exists before caching.
       #     Creates the path if it doesn't exist.
       - name: Ensure Sass path exists
-        run: mkdir -p ~/.npm/sass
+        run: mkdir -p ~/.npm-global/bin
 
       # 14. Cache Sass to avoid reinstalling.
       #     Stores the Sass binary for faster compilation.
@@ -127,7 +126,7 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm/sass
+          path: ~/.npm-global/bin/sass
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-
@@ -136,20 +135,25 @@ jobs:
       #     Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
-        run: npm install -g sass
+        run: npm install -g sass --prefix ~/.npm-global
+
+      # 16. List globally installed npm packages
+      #     Helps debug the installation path of Sass.
+      - name: List globally installed npm packages
+        run: npm list -g --depth=0
 
       # 17. Verify Sass installation
       #     Ensures Sass is installed correctly.
       - name: Verify Sass installation
-        run: ls -al ~/.npm/sass
-      
-      # 16. Upload Sass binary as an artifact
+        run: ls -al ~/.npm-global/bin
+
+      # 18. Upload Sass binary as an artifact
       #     Makes the Sass binary available for the build job.
       - name: Upload Sass binary
         uses: actions/upload-artifact@v3
         with:
           name: sass-binary
-          path: ~/.npm/sass
+          path: ~/.npm-global/bin/sass
     
   build:
     runs-on: ubuntu-latest
@@ -167,24 +171,24 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: sass-binary
-          path: ~/.npm/sass
+          path: ~/.npm-global/bin
       
       # 3. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: ~/.npm/sass/bin/sass style/main.scss style/main.css
+        run: ~/.npm-global/bin/sass style/main.scss style/main.css
 
-      # 3. Create the 'target/site' directory if it doesn't exist.
+      # 4. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 4. Build the Leptos site using Trunk in release mode.
+      # 5. Build the Leptos site using Trunk in release mode.
       #    Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 5. Move the compiled CSS to the deployment directory if needed.
+      # 6. Move the compiled CSS to the deployment directory if needed.
       #    Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
         run: |

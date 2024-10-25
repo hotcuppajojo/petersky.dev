@@ -137,6 +137,11 @@ jobs:
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
         run: npm install -g sass
+
+      # 17. Verify Sass installation
+      #     Ensures Sass is installed correctly.
+      - name: Verify Sass installation
+        run: ls -al ~/.npm/sass
       
       # 16. Upload Sass binary as an artifact
       #     Makes the Sass binary available for the build job.

@@ -1,5 +1,5 @@
 # deploy.yml
-name: Build and Deploy to Cloudflare Pages
+name: Build and Deploy to GitHub Pages
 
 on:
   push:
@@ -15,52 +15,48 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Set up Rust toolchain using actions/setup-rust.
+      # 2. Set up Rust toolchain using shivammathur/setup-rust.
       - name: Set up Rust
-        uses: actions/setup-rust@v1
+        uses: shivammathur/setup-rust@v1
         with:
           rust-version: stable  # Specify the Rust version to use.
 
-      # 3. Cache the Rust toolchain to speed up builds.
-      - name: Cache Rust Toolchain
-        id: rust-cache
+      # 3. Cache the Rust toolchain and dependencies to speed up builds.
+      - name: Cache Rust Toolchain and Dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cargo
-          key: rust-toolchain-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          path: |
+            ~/.cargo
+            ~/.rustup
+          key: rust-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            rust-toolchain-${{ runner.os }}-
+            rust-${{ runner.os }}-
 
-      # 4. Install Rust components if cache miss.
-      - name: Install Rust Components
-        if: steps.rust-cache.outputs.cache-hit != 'true'
+      # 4. Install Rust components and targets if cache miss.
+      - name: Install Rust Components and Targets
+        if: steps.Cache_Rust_Toolchain_and_Dependencies.outputs.cache-hit != 'true'
         run: |
           rustup component add rust-analyzer
           rustup component add rustfmt
+          rustup target add wasm32-unknown-unknown
 
-      # 5. Add wasm32 target for WebAssembly compilation.
-      - name: Add wasm32-unknown-unknown Target
-        if: steps.rust-cache.outputs.cache-hit != 'true'
-        run: rustup target add wasm32-unknown-unknown
-
-      # 6. Verify wasm32 target installation.
-      - name: Verify wasm32 Target
+      # 5. Verify wasm32 target installation.
+      - name: Verify wasm32 Target Installation
         run: rustup target list --installed | grep wasm32-unknown-unknown
 
-      # 7. Cache Cargo registry and Git index to minimize network usage.
+      # 6. Cache Cargo registry and Git index to minimize network usage.
       - name: Cache Cargo Registry and Git Index
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: cargo-registry-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          key: cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             cargo-registry-${{ runner.os }}-
 
-      # 8. Cache Leptos CLI to avoid reinstalling on every run.
+      # 7. Cache Leptos CLI to avoid reinstalling on every run.
       - name: Cache Leptos CLI
-        id: leptos-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-leptos
@@ -68,14 +64,13 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 9. Install Leptos CLI if not cached.
+      # 8. Install Leptos CLI if not cached.
       - name: Install Leptos CLI
-        if: steps.leptos-cache.outputs.cache-hit != 'true'
+        if: steps.Cache_Leptos_CLI.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
-      # 10. Cache Trunk to avoid unnecessary reinstalls.
+      # 9. Cache Trunk to avoid unnecessary reinstalls.
       - name: Cache Trunk
-        id: trunk-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
@@ -83,25 +78,24 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 11. Install Trunk if not cached.
+      # 10. Install Trunk if not cached.
       - name: Install Trunk
-        if: steps.trunk-cache.outputs.cache-hit != 'true'
+        if: steps.Cache_Trunk.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 12. Verify Trunk installation.
+      # 11. Verify Trunk installation.
       - name: Verify Trunk Installation
         run: trunk --version
 
-      # 13. Set up Node.js environment.
+      # 12. Set up Node.js environment.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'  # Specify the Node.js version to use.
-          cache: 'npm'         # Enables caching of npm dependencies.
+          node-version: '18'  # Specify the desired Node.js version.
+          cache: 'npm'         # Enables automatic caching of npm dependencies.
 
-      # 14. Cache npm global packages to speed up installations.
+      # 13. Cache npm global packages to speed up installations.
       - name: Cache npm Global Packages
-        id: cache-npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -109,44 +103,44 @@ jobs:
           restore-keys: |
             npm-global-${{ runner.os }}-
 
-      # 15. Install Sass globally using npm if cache miss.
+      # 14. Install Sass globally using npm if cache miss.
       - name: Install Sass
-        if: steps.cache-npm.outputs.cache-hit != 'true'
+        if: steps.Cache_npm_Global_Packages.outputs.cache-hit != 'true'
         run: npm install -g sass
 
-      # 16. Verify Sass installation.
+      # 15. Verify Sass installation.
       - name: Verify Sass Installation
         run: |
           which sass
           sass --version
 
-      # 17. Lint the Rust codebase.
+      # 16. Lint the Rust codebase.
       - name: Lint Rust Codebase
         run: cargo fmt -- --check
 
-      # 18. Run Rust tests.
+      # 17. Run Rust tests.
       - name: Run Rust Tests
         run: cargo test --release
 
-      # 19. Compile SCSS to CSS.
+      # 18. Compile SCSS to CSS.
       - name: Compile SCSS to CSS
         run: sass style/main.scss style/main.css
 
-      # 20. Ensure the 'target/site' directory exists.
+      # 19. Ensure the 'target/site' directory exists.
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
-      # 21. Build the Leptos site using Trunk in release mode.
+      # 20. Build the Leptos site using Trunk in release mode.
       - name: Build Leptos Site with Trunk
         run: trunk build --release
 
-      # 22. Move the compiled CSS to the deployment directory.
+      # 21. Move the compiled CSS to the deployment directory.
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
 
-      # 23. Deploy the built site to GitHub Pages.
+      # 22. Deploy the built site to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

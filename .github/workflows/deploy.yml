@@ -41,10 +41,10 @@ jobs:
       #    Ensures all required components are available for building.
       - name: Install Rust toolchain and components
         run: |
-          rustup toolchain install stable
+          rustup toolchain install -g stable
           rustup default stable
-          rustup component add rust-analyzer
-          rustup component add rustfmt
+          rustup component add -g rust-analyzer
+          rustup component add -g rustfmt
 
       # 5. Cache the wasm32-unknown-unknown target to speed up builds.
       #    Reuse the target if it hasn't changed.
@@ -62,7 +62,7 @@ jobs:
       #    We need to run separate checks for the target.
       - name: Install wasm32-unknown-unknown target
         if: steps.wasm32-cache.outputs.cache-hit != 'true'
-        run: rustup target add wasm32-unknown-unknown
+        run: rustup target add -g wasm32-unknown-unknown
 
       # 7. Verify wasm32-unknown-unknown target installation
       #    Ensures the target is installed correctly.
@@ -96,7 +96,7 @@ jobs:
       #     Guarantees the CLI is available for the build process.
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: cargo install --locked cargo-leptos
+        run: cargo install -g --locked cargo-leptos
 
       # 11. Cache Trunk to avoid unnecessary reinstalls.
       #     Improves efficiency by storing the compiled Trunk binary.
@@ -113,7 +113,7 @@ jobs:
       #     Required for building the static site assets.
       - name: Install Trunk for static assets
         if: steps.trunk-cache.outputs.cache-hit != 'true'
-        run: cargo install trunk
+        run: cargo install -g trunk
     
   build:
     runs-on: ubuntu-latest

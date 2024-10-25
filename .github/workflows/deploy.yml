@@ -117,8 +117,8 @@ jobs:
 
       # 13. Ensure the Sass path exists before caching.
       #     Creates the path if it doesn't exist.
-      - name: Ensure Sass path exists in workspace
-        run: mkdir -p $GITHUB_WORKSPACE/.npm/bin
+      - name: Ensure Sass path exists
+        run: mkdir -p /home/runner/.npm/bin
 
       # 14. Cache Sass to avoid reinstalling.
       #     Speeds up the installation of Sass and other npm packages.
@@ -126,7 +126,7 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: $GITHUB_WORKSPACE/.npm
+          path: /home/runner/.npm
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-
@@ -135,33 +135,32 @@ jobs:
       #     Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
-        run: npm install -g sass --prefix $GITHUB_WORKSPACE/.npm
+        run: npm install -g sass --prefix /home/runner/.npm
 
-      # Debugging: List contents of $GITHUB_WORKSPACE/.npm
-      - name: List $GITHUB_WORKSPACE/.npm Contents
-        run: ls -alR $GITHUB_WORKSPACE/.npm
+      # Debugging: List contents of /home/runner/.npm
+      - name: List /home/runner/.npm Contents
+        run: ls -alR /home/runner/.npm
 
       # 16. List globally installed npm packages
       #     Helps debug the installation path of Sass.
       - name: List globally installed npm packages
-        run: npm list -g --depth=0 --prefix $GITHUB_WORKSPACE/.npm
+        run: npm list -g --depth=0 --prefix /home/runner/.npm
 
       # 17. Verify Sass installation
       #     Ensures Sass is installed correctly.
       - name: Verify Sass installation
-        run: ls -al $GITHUB_WORKSPACE/.npm/bin/sass
+        run: ls -al /home/runner/.npm/bin/sass
 
       # 18. Confirm /home/runner/.npm is not empty
-      - name: Confirm $GITHUB_WORKSPACE/.npm is not empty
+      - name: Confirm /home/runner/.npm is not empty
         run: |
-          if [ -d "$GITHUB_WORKSPACE/.npm" ]; then
-            echo "$GITHUB_WORKSPACE/.npm exists."
-            ls -alR $GITHUB_WORKSPACE/.npm
+          if [ -d "/home/runner/.npm" ]; then
+            echo "/home/runner/.npm exists."
+            ls -alR /home/runner/.npm
           else
-            echo "$GITHUB_WORKSPACE/.npm does not exist."
+            echo "/home/runner/.npm does not exist."
             exit 1
           fi
-
 
       # 19. Upload Sass binary as an artifact
       #     Makes the Sass binary available for the build job.
@@ -169,7 +168,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: sass-binary
-          path: $GITHUB_WORKSPACE/.npm
+          path: /home/runner/.npm
           include-hidden-files: true
           if-no-files-found: warn
     
@@ -189,17 +188,17 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: sass-binary
-          path: $GITHUB_WORKSPACE/.npm
+          path: /home/runner/.npm
 
       # 3. Set execute permissions on Sass binary
       #    Ensures the Sass binary is executable.
       - name: Set execute permissions on Sass binary
-        run: chmod u+x $GITHUB_WORKSPACE/.npm/bin/sass
+        run: chmod u+x /home/runner/.npm/bin/sass
 
       # 4. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: $GITHUB_WORKSPACE/.npm/bin/sass style/main.scss style/main.css
+        run: /home/runner/.npm/bin/sass style/main.scss style/main.css
 
       # 5. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.

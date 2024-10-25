@@ -120,22 +120,26 @@ jobs:
       - name: Ensure Sass path exists
         run: mkdir -p $HOME/.npm/bin
 
-      # 14. Cache Sass to avoid reinstalling.
-      #     Stores the Sass binary for faster compilation.
-      - name: Cache Sass
-        id: sass-cache
+      # 14. Cache the npm cache directory.
+      #     Speeds up the installation of Sass and other npm packages.
+      - name: Cache npm dependencies
+        id: npm-cache
         uses: actions/cache@v4
         with:
-          path: $HOME/.npm
-          key: sass-${{ runner.os }}-v1.62.1
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            sass-${{ runner.os }}-
+            ${{ runner.os }}-npm-cache-
 
       # 15. Install Sass if it's not cached.
       #     Required for compiling SCSS to CSS.
       - name: Install Sass
-        if: steps.sass-cache.outputs.cache-hit != 'true'
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm install -g sass --prefix $HOME/.npm
+
+      # Debugging: List contents of $HOME/.npm
+      - name: List $HOME/.npm Contents
+        run: ls -alR $HOME/.npm
 
       # 16. List globally installed npm packages
       #     Helps debug the installation path of Sass.
@@ -154,6 +158,7 @@ jobs:
         with:
           name: sass-binary
           path: $HOME/.npm
+          include-hidden-files: true
     
   build:
     runs-on: ubuntu-latest
@@ -171,7 +176,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: sass-binary
-          path: $HOME/.npm/bin
+          path: $HOME/.npm
 
       # 3. Set execute permissions on Sass binary
       #    Ensures the Sass binary is executable.

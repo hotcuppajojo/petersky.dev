@@ -137,6 +137,14 @@ jobs:
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
         run: npm install -g sass
+      
+      # 16. Upload Sass binary as an artifact
+      #     Makes the Sass binary available for the build job.
+      - name: Upload Sass binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: sass-binary
+          path: ~/.npm/sass
     
   build:
     runs-on: ubuntu-latest
@@ -147,11 +155,19 @@ jobs:
       #    Ensures the workflow operates on the latest code changes.
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # 2. Compile SCSS to CSS.
+      
+      # 2. Download Sass binary artifact
+      #    Retrieves the Sass binary for compiling SCSS to CSS.
+      - name: Download Sass binary
+        uses: actions/download-artifact@v3
+        with:
+          name: sass-binary
+          path: ~/.npm/sass
+      
+      # 3. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: sass style/main.scss style/main.css
+        run: ~/.npm/sass/bin/sass style/main.scss style/main.css
 
       # 3. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.

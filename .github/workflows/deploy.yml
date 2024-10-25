@@ -11,18 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository.
+      # 1. Checkout the latest code from the 'main' branch.
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Set up Rust toolchain using shivammathur/setup-rust.
-      - name: Set up Rust
-        uses: shivammathur/setup-rust@v1
-        with:
-          rust-version: stable  # Specify the Rust version to use.
+      # 2. Install Rust manually using rustup.
+      - name: Install Rust
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       # 3. Cache the Rust toolchain and dependencies to speed up builds.
       - name: Cache Rust Toolchain and Dependencies
+        id: rust-cache
         uses: actions/cache@v4
         with:
           path: |
@@ -32,15 +33,15 @@ jobs:
           restore-keys: |
             rust-${{ runner.os }}-
 
-      # 4. Install Rust components and targets if cache miss.
-      - name: Install Rust Components and Targets
-        if: steps.Cache_Rust_Toolchain_and_Dependencies.outputs.cache-hit != 'true'
+      # 4. Install Rust components and wasm32 target if cache miss.
+      - name: Install Rust Components and wasm32 Target
+        if: steps.rust-cache.outputs.cache-hit != 'true'
         run: |
           rustup component add rust-analyzer
           rustup component add rustfmt
           rustup target add wasm32-unknown-unknown
 
-      # 5. Verify wasm32 target installation.
+      # 5. Verify wasm32-unknown-unknown target installation.
       - name: Verify wasm32 Target Installation
         run: rustup target list --installed | grep wasm32-unknown-unknown
 
@@ -57,6 +58,7 @@ jobs:
 
       # 7. Cache Leptos CLI to avoid reinstalling on every run.
       - name: Cache Leptos CLI
+        id: leptos-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-leptos
@@ -64,13 +66,14 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 8. Install Leptos CLI if not cached.
+      # 8. Install Leptos CLI if it's not cached.
       - name: Install Leptos CLI
-        if: steps.Cache_Leptos_CLI.outputs.cache-hit != 'true'
+        if: steps.leptos-cache.outputs.cache-hit != 'true'
         run: cargo install --locked cargo-leptos
 
       # 9. Cache Trunk to avoid unnecessary reinstalls.
       - name: Cache Trunk
+        id: trunk-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
@@ -78,9 +81,9 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 10. Install Trunk if not cached.
-      - name: Install Trunk
-        if: steps.Cache_Trunk.outputs.cache-hit != 'true'
+      # 10. Install Trunk if it's not cached.
+      - name: Install Trunk for Static Assets
+        if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
       # 11. Verify Trunk installation.
@@ -96,6 +99,7 @@ jobs:
 
       # 13. Cache npm global packages to speed up installations.
       - name: Cache npm Global Packages
+        id: cache-npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -105,7 +109,7 @@ jobs:
 
       # 14. Install Sass globally using npm if cache miss.
       - name: Install Sass
-        if: steps.Cache_npm_Global_Packages.outputs.cache-hit != 'true'
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm install -g sass
 
       # 15. Verify Sass installation.

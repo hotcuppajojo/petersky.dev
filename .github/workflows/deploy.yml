@@ -118,7 +118,7 @@ jobs:
       # 13. Ensure the Sass path exists before caching.
       #     Creates the path if it doesn't exist.
       - name: Ensure Sass path exists
-        run: mkdir -p ~/.npm/bin
+        run: mkdir -p $HOME/.npm/bin
 
       # 14. Cache Sass to avoid reinstalling.
       #     Stores the Sass binary for faster compilation.
@@ -126,7 +126,7 @@ jobs:
         id: sass-cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: $HOME/.npm
           key: sass-${{ runner.os }}-v1.62.1
           restore-keys: |
             sass-${{ runner.os }}-
@@ -135,17 +135,17 @@ jobs:
       #     Required for compiling SCSS to CSS.
       - name: Install Sass
         if: steps.sass-cache.outputs.cache-hit != 'true'
-        run: npm install -g sass --prefix ~/.npm
+        run: npm install -g sass --prefix $HOME/.npm
 
       # 16. List globally installed npm packages
       #     Helps debug the installation path of Sass.
       - name: List globally installed npm packages
-        run: npm list -g --depth=0
+        run: npm list -g --depth=0 --prefix $HOME/.npm
 
       # 17. Verify Sass installation
       #     Ensures Sass is installed correctly.
       - name: Verify Sass installation
-        run: ls -al ~/.npm/bin
+        run: ls -al $HOME/.npm/bin
 
       # 18. Upload Sass binary as an artifact
       #     Makes the Sass binary available for the build job.
@@ -153,7 +153,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: sass-binary
-          path: ~/.npm
+          path: $HOME/.npm
     
   build:
     runs-on: ubuntu-latest
@@ -171,17 +171,17 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: sass-binary
-          path: ~/.npm/bin
+          path: $HOME/.npm/bin
 
       # 3. Set execute permissions on Sass binary
       #    Ensures the Sass binary is executable.
       - name: Set execute permissions on Sass binary
-        run: chmod u+x ~/.npm/bin/sass
+        run: chmod u+x $HOME/.npm/bin/sass
 
       # 4. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
-        run: ~/.npm/bin/sass style/main.scss style/main.css
+        run: $HOME/.npm/bin/sass style/main.scss style/main.css
 
       # 5. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.

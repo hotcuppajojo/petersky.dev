@@ -125,44 +125,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      # 2. Ensure the Sass path exists before caching.
-      #    Creates the path if it doesn't exist.
-      - name: Ensure Sass path exists
-        run: mkdir -p ~/.npm/sass
+      # 2. Setup Node.js environment.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-      # 3. Cache Sass to avoid reinstalling.
-      #    Stores the Sass binary for faster compilation.
-      - name: Cache Sass
-        id: sass-cache
+      # 3. Cache npm global packages to speed up installations.
+      - name: Cache npm global packages
         uses: actions/cache@v4
         with:
-          path: ~/.npm/sass
-          key: sass-${{ runner.os }}-v1.62.1
+          path: ~/.npm
+          key: npm-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            sass-${{ runner.os }}-
+            npm-cache-${{ runner.os }}-
 
-      # 4. Install Sass if it's not cached.
-      # Required for compiling SCSS to CSS.
+      # 4. Install Sass globally using npm.
       - name: Install Sass
-        if: steps.sass-cache.outputs.cache-hit != 'true'
+        if: steps.cache-npm-global.outputs.cache-hit != 'true'
         run: npm install -g sass
 
-      # 4. Compile SCSS to CSS.
-      #    Converts the SCSS files to CSS for the site.
-      - name: Compile SCSS
-        run: /home/runner/.npm/bin/sass style/main.scss style/main.css
+      # 5. Verify Sass installation.
+      - name: Verify Sass installation
+        run: |
+          which sass
+          sass --version
 
-      # 5. Create the 'target/site' directory if it doesn't exist.
+      # 6. Compile SCSS to CSS.
+      - name: Compile SCSS
+        run: sass style/main.scss style/main.css
+
+      # 7. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 6. Build the Leptos site using Trunk in release mode.
+      # 8. Build the Leptos site using Trunk in release mode.
       #    Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 7. Move the compiled CSS to the deployment directory if needed.
+      # 9. Move the compiled CSS to the deployment directory if needed.
       #    Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
         run: |

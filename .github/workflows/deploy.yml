@@ -173,22 +173,27 @@ jobs:
           name: sass-binary
           path: ~/.npm-global/bin
       
-      # 3. Compile SCSS to CSS.
+      # 3. Set execute permissions on Sass binary
+      #    Ensures the Sass binary is executable.
+      - name: Set execute permissions on Sass binary
+        run: chmod +x ~/.npm-global/bin/sass
+
+      # 4. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
       - name: Compile SCSS
         run: ~/.npm-global/bin/sass style/main.scss style/main.css
 
-      # 4. Create the 'target/site' directory if it doesn't exist.
+      # 5. Create the 'target/site' directory if it doesn't exist.
       #    Prepares the directory structure for the build output.
       - name: Ensure target/site directory exists
         run: mkdir -p target/site
 
-      # 5. Build the Leptos site using Trunk in release mode.
+      # 6. Build the Leptos site using Trunk in release mode.
       #    Produces optimized assets for deployment.
       - name: Build Leptos site for CSR with Trunk
         run: trunk build --release
 
-      # 6. Move the compiled CSS to the deployment directory if needed.
+      # 7. Move the compiled CSS to the deployment directory if needed.
       #    Ensures the CSS file is available in the target output.
       - name: Move Compiled CSS to Deployment Directory
         run: |

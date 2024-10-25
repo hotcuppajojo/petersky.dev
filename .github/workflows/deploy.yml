@@ -172,11 +172,11 @@ jobs:
         with:
           name: sass-binary
           path: ~/.npm-global/bin
-      
+
       # 3. Set execute permissions on Sass binary
       #    Ensures the Sass binary is executable.
       - name: Set execute permissions on Sass binary
-        run: chmod +x ~/.npm-global/bin/sass
+        run: chmod u+x ~/.npm-global/bin/sass
 
       # 4. Compile SCSS to CSS.
       #    Converts the SCSS files to CSS for the site.
@@ -199,6 +199,7 @@ jobs:
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
+          
   deploy:
     runs-on: ubuntu-latest
     needs: build

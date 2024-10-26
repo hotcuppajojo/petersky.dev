@@ -97,54 +97,60 @@ jobs:
           node-version: '18'  # Specify the desired Node.js version.
           # Removed 'cache: npm' since there are no project-specific npm dependencies.
 
-      # 13. Cache npm global packages to speed up installations.
+      # 13. Dynamically Fetch the Latest Sass Version
+      - name: Fetch Latest Sass Version
+        id: fetch-sass
+        run: echo "SASS_VERSION=$(npm view sass version)" >> $GITHUB_ENV
+
+      # 14. Cache npm Global Packages with the Latest Sass Version
       - name: Cache npm Global Packages
-        id: cache-npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: npm-global-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          key: npm-global-sass-${{ runner.os }}-${{ env.SASS_VERSION }}
           restore-keys: |
-            npm-global-${{ runner.os }}-
+            npm-global-sass-${{ runner.os }}-
 
-      # 14. Install Sass globally using npm if cache miss.
+      # 15. Install Sass Globally Using the Latest Version if Cache Miss
       - name: Install Sass
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm install -g sass
+        if: steps.Cache_npm_Global_Packages.outputs.cache-hit != 'true'
+        run: npm install -g sass@${{ env.SASS_VERSION }}
 
-      # 15. Verify Sass installation.
+      # 16. Verify Sass Installation
       - name: Verify Sass Installation
         run: |
+          echo "Global npm bin directory: $(npm bin -g)"
+          export PATH="$(npm bin -g):$PATH"
           which sass
           sass --version
 
-      # 16. Lint the Rust codebase.
+      # 17. Lint the Rust codebase.
       - name: Lint Rust Codebase
         run: cargo fmt -- --check
 
-      # 17. Run Rust tests.
+      # 18. Run Rust tests.
       - name: Run Rust Tests
         run: cargo test --release
 
-      # 18. Compile SCSS to CSS.
+      # 19. Compile SCSS to CSS.
       - name: Compile SCSS to CSS
         run: sass style/main.scss style/main.css
 
-      # 19. Ensure the 'target/site' directory exists.
+      # 20. Ensure the 'target/site' directory exists.
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
-      # 20. Build the Leptos site using Trunk in release mode.
+      # 21. Build the Leptos site using Trunk in release mode.
       - name: Build Leptos Site with Trunk
         run: trunk build --release
 
-      # 21. Move the compiled CSS to the deployment directory.
+      # 22. Move the compiled CSS to the deployment directory.
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
 
-      # 22. Deploy the built site to GitHub Pages.
+      # 23. Deploy the built site to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

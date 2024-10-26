@@ -127,10 +127,14 @@ footer {
     color: #ff6700;
 } 
 
-.social-links {
-    margin-top: 10px;
-    font-size: 1.1rem;
-} 
+.social-links a {
+    margin: 0 5px;
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: scale(1.2);
+    }
+}
 
 @media (max-width: 768px) {
     header {

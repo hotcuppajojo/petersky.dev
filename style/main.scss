@@ -28,8 +28,9 @@ header {
 }
 
 .neon-text {
-    color: #faff00;
-    text-shadow: 0 0 10px #faff00, 0 0 20px #faff00, 0 0 40px #ff6700;
+    color: #ffdd00;
+    text-shadow: 0 0 5px #ffdd00, 0 0 10px #ffdd00, 0 0 20px #ffdd00;
+    animation: neon-glow 1.5s infinite alternate;
 }
 
 .tagline {

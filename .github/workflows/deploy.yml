@@ -137,7 +137,7 @@ jobs:
 
       - name: Run Rust Tests
         run: cargo test --release
-
+      
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
@@ -153,4 +153,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site
+          publish_dir: ./target/site/pkg

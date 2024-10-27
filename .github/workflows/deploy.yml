@@ -1,4 +1,4 @@
-# deploy.yml
+# .github/workflows/deploy.yml
 name: Build and Deploy to GitHub Pages
 
 on:
@@ -11,19 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the latest code from the 'main' branch.
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Install Rust manually using rustup.
       - name: Install Rust
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      # 3. Cache the Rust toolchain and dependencies to speed up builds.
       - name: Cache Rust Toolchain and Dependencies
-        id: rust-cache
         uses: actions/cache@v4
         with:
           path: |
@@ -33,19 +29,9 @@ jobs:
           restore-keys: |
             rust-${{ runner.os }}-
 
-      # 4. Install Rust components and wasm32 target if cache miss.
-      - name: Install Rust Components and wasm32 Target
-        if: steps.rust-cache.outputs.cache-hit != 'true'
-        run: |
-          rustup component add rust-analyzer
-          rustup component add rustfmt
-          rustup target add wasm32-unknown-unknown
+      - name: Install wasm32 Target
+        run: rustup target add wasm32-unknown-unknown
 
-      # 5. Verify wasm32-unknown-unknown target installation.
-      - name: Verify wasm32 Target Installation
-        run: rustup target list --installed | grep wasm32-unknown-unknown
-
-      # 6. Cache Cargo registry and Git index to minimize network usage.
       - name: Cache Cargo Registry and Git Index
         uses: actions/cache@v4
         with:
@@ -56,103 +42,60 @@ jobs:
           restore-keys: |
             cargo-registry-${{ runner.os }}-
 
-      # 7. Cache Leptos CLI to avoid reinstalling on every run.
       - name: Cache Leptos CLI
-        id: leptos-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-leptos
-          key: leptos-cli-${{ runner.os }}-v0.6.15
+          key: leptos-cli-${{ runner.os }}-latest
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      # 8. Install Leptos CLI if it's not cached.
-      - name: Install Leptos CLI
+      - name: Install Leptos CLI if not cached
         if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: cargo install --locked cargo-leptos
+        run: cargo install cargo-leptos
 
-      # 9. Cache Trunk to avoid unnecessary reinstalls.
       - name: Cache Trunk
-        id: trunk-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
-          key: trunk-cli-${{ runner.os }}-v0.20.3
+          key: trunk-cli-${{ runner.os }}-latest
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      # 10. Install Trunk if it's not cached.
-      - name: Install Trunk for Static Assets
+      - name: Install Trunk if not cached
         if: steps.trunk-cache.outputs.cache-hit != 'true'
         run: cargo install trunk
 
-      # 11. Verify Trunk installation.
-      - name: Verify Trunk Installation
-        run: trunk --version
-
-      # 12. Set up Node.js environment without caching npm dependencies.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'  # Specify the desired Node.js version.
-          # Removed 'cache: npm' since there are no project-specific npm dependencies.
+          node-version: '18'
 
-      # 13. Dynamically Fetch the Latest Sass Version
-      - name: Fetch Latest Sass Version
-        id: fetch-sass
-        run: echo "SASS_VERSION=$(npm view sass version)" >> $GITHUB_ENV
-
-      # 14. Cache npm Global Packages with the Latest Sass Version
-      - name: Cache npm Global Packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-global-sass-${{ runner.os }}-${{ env.SASS_VERSION }}
-          restore-keys: |
-            npm-global-sass-${{ runner.os }}-
-
-      # 15. Install Sass Globally Using the Latest Version if Cache Miss
       - name: Install Sass
-        if: steps.Cache_npm_Global_Packages.outputs.cache-hit != 'true'
-        run: npm install -g sass@${{ env.SASS_VERSION }}
+        run: npm install -g sass
 
-      # 16. Verify Sass Installation
-      - name: Verify Sass Installation
-        run: |
-          echo "Global npm bin directory: $(npm bin -g)"
-          export PATH="$(npm bin -g):$PATH"
-          which sass
-          sass --version
-
-      # 17. Lint the Rust codebase.
-      - name: Lint Rust Codebase
-        run: cargo fmt -- --check
-
-      # 18. Run Rust tests.
-      - name: Run Rust Tests
-        run: cargo test --release
-
-      # 19. Compile SCSS to CSS.
       - name: Compile SCSS to CSS
         run: sass style/main.scss style/main.css
 
-      # 20. Ensure the 'target/site' directory exists.
+      - name: Lint Rust Codebase
+        run: cargo fmt -- --check
+
+      - name: Run Rust Tests
+        run: cargo test --release
+
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
-      # 21. Build the Leptos site using Trunk in release mode.
       - name: Build Leptos Site with Trunk
         run: trunk build --release
 
-      # 22. Move the compiled CSS to the deployment directory.
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/pkg/style
           cp style/main.css target/site/pkg/style/
 
-      # 23. Deploy the built site to GitHub Pages.
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site/pkg
+          publish_dir: ./target/site

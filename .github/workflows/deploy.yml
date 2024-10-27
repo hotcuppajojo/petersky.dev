@@ -14,10 +14,37 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Rust
+      - name: Install Rust Toolchain and Components if Necessary
         run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          # Install Rust if not already installed
+          if ! command -v rustc &> /dev/null; then
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+            echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          else
+            echo "Rust is already installed."
+          fi
+
+          # Check if the latest Rust version is installed and update only if necessary
+          installed_rust_version=$(rustc --version | awk '{print $2}')
+          latest_rust_version=$(curl -s https://static.rust-lang.org/dist/channel-rust-stable.toml | grep 'version =' | head -n 1 | cut -d '"' -f 2)
+          echo "Installed Rust version: $installed_rust_version"
+          echo "Latest Rust version: $latest_rust_version"
+          if [ "$installed_rust_version" != "$latest_rust_version" ]; then
+            echo "Updating Rust to latest version."
+            rustup update
+          else
+            echo "Rust is up-to-date."
+          fi
+
+          # Install required components if missing
+          for component in rustfmt rust-analyzer; do
+            if ! rustup component list --installed | grep -q "^${component} "; then
+              echo "Installing ${component}."
+              rustup component add $component
+            else
+              echo "${component} is already installed."
+            fi
+          done
 
       - name: Cache Rust Toolchain and Dependencies
         uses: actions/cache@v4
@@ -42,21 +69,20 @@ jobs:
           restore-keys: |
             cargo-registry-${{ runner.os }}-
 
-      - name: Cache Leptos CLI
-        id: leptos-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin/cargo-leptos
-          key: leptos-cli-${{ runner.os }}-latest
-          restore-keys: |
-            leptos-cli-${{ runner.os }}-
-
-      - name: Install Leptos CLI
-        if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: cargo install --force --locked cargo-leptos
+      - name: Check and Install Leptos CLI
+        run: |
+          latest_version=$(cargo search cargo-leptos | grep -oP '(?<=^cargo-leptos = ")[^"]*')
+          installed_version=$(cargo-leptos --version 2>/dev/null | awk '{print $2}' || echo "none")
+          echo "Latest cargo-leptos version: $latest_version"
+          echo "Installed cargo-leptos version: $installed_version"
+          if [ "$installed_version" != "$latest_version" ]; then
+            echo "Installing/updating cargo-leptos to version $latest_version"
+            cargo install cargo-leptos --force --locked
+          else
+            echo "cargo-leptos is up-to-date"
+          fi
 
       - name: Cache Trunk
-        id: trunk-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
@@ -64,9 +90,18 @@ jobs:
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
-      - name: Install Trunk if not cached
-        if: steps.trunk-cache.outputs.cache-hit != 'true'
-        run: cargo install trunk
+      - name: Check and Install Trunk
+        run: |
+          latest_version=$(cargo search trunk | grep -oP '(?<=^trunk = ")[^"]*')
+          installed_version=$(trunk --version 2>/dev/null | awk '{print $2}' || echo "none")
+          echo "Latest trunk version: $latest_version"
+          echo "Installed trunk version: $installed_version"
+          if [ "$installed_version" != "$latest_version" ]; then
+            echo "Installing/updating trunk to version $latest_version"
+            cargo install trunk --force
+          else
+            echo "Trunk is up-to-date"
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -80,9 +115,19 @@ jobs:
           key: npm-global-sass-${{ runner.os }}-latest
           restore-keys: |
             npm-global-sass-${{ runner.os }}-
-      
-      - name: Install Sass
-        run: npm install -g sass
+
+      - name: Check and Install Sass
+        run: |
+          latest_version=$(npm view sass version)
+          installed_version=$(sass --version 2>/dev/null | awk '{print $2}' || echo "none")
+          echo "Latest Sass version: $latest_version"
+          echo "Installed Sass version: $installed_version"
+          if [ "$installed_version" != "$latest_version" ]; then
+            echo "Installing/updating Sass to version $latest_version"
+            npm install -g sass
+          else
+            echo "Sass is up-to-date"
+          fi
 
       - name: Compile SCSS to CSS
         run: sass style/main.scss style/main.css

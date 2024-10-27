@@ -1,5 +1,5 @@
 [build]
-dist = "target/site"
+dist = "target/site/pkg"
 public_url = "/"  
 
 [scss]

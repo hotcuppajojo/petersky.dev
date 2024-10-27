@@ -16,25 +16,14 @@ jobs:
 
       - name: Install Rust Toolchain and Components if Necessary
         run: |
-          # Install Rust if not already installed
           if ! command -v rustc &> /dev/null; then
             curl https://sh.rustup.rs -sSf | sh -s -- -y
             echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          else
-            echo "Rust is already installed."
           fi
-
-          # Update Rust to the latest stable version
-          echo "Updating Rust to the latest stable version..."
           rustup update
-
-          # Install required components if missing
           for component in rustfmt rust-analyzer; do
             if ! rustup component list --installed | grep -q "^${component} "; then
-              echo "Installing ${component}."
               rustup component add $component
-            else
-              echo "${component} is already installed."
             fi
           done
 
@@ -61,24 +50,27 @@ jobs:
           restore-keys: |
             cargo-registry-${{ runner.os }}-
 
+      - name: Cache Leptos CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-leptos
+          key: leptos-cli-${{ runner.os }}
+          restore-keys: |
+            leptos-cli-${{ runner.os }}-
+
       - name: Check and Install Leptos CLI
         run: |
           latest_version=$(cargo search cargo-leptos | grep -oP '(?<=^cargo-leptos = ")[^"]*')
           installed_version=$(cargo-leptos --version 2>/dev/null | awk '{print $2}' || echo "none")
-          echo "Latest cargo-leptos version: $latest_version"
-          echo "Installed cargo-leptos version: $installed_version"
           if [ "$installed_version" != "$latest_version" ]; then
-            echo "Installing/updating cargo-leptos to version $latest_version"
             cargo install cargo-leptos --force --locked
-          else
-            echo "cargo-leptos is up-to-date"
           fi
 
       - name: Cache Trunk
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
-          key: trunk-cli-${{ runner.os }}-latest
+          key: trunk-cli-${{ runner.os }}
           restore-keys: |
             trunk-cli-${{ runner.os }}-
 
@@ -86,13 +78,8 @@ jobs:
         run: |
           latest_version=$(cargo search trunk | grep -oP '(?<=^trunk = ")[^"]*')
           installed_version=$(trunk --version 2>/dev/null | awk '{print $2}' || echo "none")
-          echo "Latest trunk version: $latest_version"
-          echo "Installed trunk version: $installed_version"
           if [ "$installed_version" != "$latest_version" ]; then
-            echo "Installing/updating trunk to version $latest_version"
             cargo install trunk --force
-          else
-            echo "Trunk is up-to-date"
           fi
 
       - name: Set up Node.js
@@ -104,7 +91,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: npm-global-sass-${{ runner.os }}-latest
+          key: npm-global-sass-${{ runner.os }}
           restore-keys: |
             npm-global-sass-${{ runner.os }}-
 
@@ -112,13 +99,8 @@ jobs:
         run: |
           latest_version=$(npm view sass version)
           installed_version=$(sass --version 2>/dev/null | awk '{print $2}' || echo "none")
-          echo "Latest Sass version: $latest_version"
-          echo "Installed Sass version: $installed_version"
           if [ "$installed_version" != "$latest_version" ]; then
-            echo "Installing/updating Sass to version $latest_version"
             npm install -g sass
-          else
-            echo "Sass is up-to-date"
           fi
 
       - name: Lint Rust Codebase
@@ -138,11 +120,11 @@ jobs:
 
       - name: Move Compiled CSS to Deployment Directory
         run: |
-          mkdir -p target/site/style
-          cp style/main.css target/site/style/
+          mkdir -p target/site/pkg/style
+          cp style/main.css target/site/pkg/style/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site
+          publish_dir: ./target/site/pkg

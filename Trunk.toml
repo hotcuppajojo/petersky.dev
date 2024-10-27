@@ -1,5 +1,6 @@
 [build]
-dist = "target/site"  # Set output folder directly to 'target/site'
+dist = "target/site"
+public_url = "/"  
 
 [scss]
 source = "style/main.scss"

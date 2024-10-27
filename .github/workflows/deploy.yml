@@ -133,13 +133,13 @@ jobs:
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
+      - name: Build Leptos Site with Trunk
+        run: trunk build --release
+
       - name: Move Compiled CSS to Deployment Directory
         run: |
           mkdir -p target/site/style
           cp style/main.css target/site/style/
-
-      - name: Build Leptos Site with Trunk
-        run: trunk build --release
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

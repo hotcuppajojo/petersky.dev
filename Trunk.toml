@@ -1,5 +1,5 @@
 [build]
-dist = "target/site/pkg"  # Main output directory for static assets
+dist = "target/site"  # Set output folder directly to 'target/site'
 
 [scss]
 source = "style/main.scss"

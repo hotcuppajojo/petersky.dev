@@ -24,17 +24,9 @@ jobs:
             echo "Rust is already installed."
           fi
 
-          # Check if the latest Rust version is installed and update only if necessary
-          installed_rust_version=$(rustc --version | awk '{print $2}')
-          latest_rust_version=$(curl -s https://static.rust-lang.org/dist/channel-rust-stable.toml | grep 'version =' | head -n 1 | cut -d '"' -f 2)
-          echo "Installed Rust version: $installed_rust_version"
-          echo "Latest Rust version: $latest_rust_version"
-          if [ "$installed_rust_version" != "$latest_rust_version" ]; then
-            echo "Updating Rust to latest version."
-            rustup update
-          else
-            echo "Rust is up-to-date."
-          fi
+          # Update Rust to the latest stable version
+          echo "Updating Rust to the latest stable version..."
+          rustup update
 
           # Install required components if missing
           for component in rustfmt rust-analyzer; do
@@ -129,28 +121,28 @@ jobs:
             echo "Sass is up-to-date"
           fi
 
-      - name: Compile SCSS to CSS
-        run: sass style/main.scss style/main.css
-
       - name: Lint Rust Codebase
         run: cargo fmt -- --check
 
       - name: Run Rust Tests
         run: cargo test --release
       
+      - name: Compile SCSS to CSS
+        run: sass style/main.scss style/main.css
+      
       - name: Ensure target/site Directory Exists
         run: mkdir -p target/site
 
-      - name: Build Leptos Site with Trunk
-        run: trunk build --release
-
       - name: Move Compiled CSS to Deployment Directory
         run: |
-          mkdir -p target/site/pkg/style
-          cp style/main.css target/site/pkg/style/
+          mkdir -p target/site/style
+          cp style/main.css target/site/style/
+
+      - name: Build Leptos Site with Trunk
+        run: trunk build --release
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site/pkg
+          publish_dir: ./target/site

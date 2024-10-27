@@ -43,6 +43,7 @@ jobs:
             cargo-registry-${{ runner.os }}-
 
       - name: Cache Leptos CLI
+        id: leptos-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-leptos
@@ -50,11 +51,12 @@ jobs:
           restore-keys: |
             leptos-cli-${{ runner.os }}-
 
-      - name: Install Leptos CLI if not cached
+      - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: cargo install cargo-leptos
+        run: cargo install --locked cargo-leptos
 
       - name: Cache Trunk
+        id: trunk-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
@@ -70,7 +72,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
+      
+      - name: Cache npm Global Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-global-sass-${{ runner.os }}-latest
+          restore-keys: |
+            npm-global-sass-${{ runner.os }}-
+      
       - name: Install Sass
         run: npm install -g sass
 

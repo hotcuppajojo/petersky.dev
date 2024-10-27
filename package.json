@@ -1,0 +1,14 @@
+{
+  "name": "petersky.dev",
+  "version": "1.0.0",
+  "description": "<picture>     <source srcset=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_Solid_White.svg\" media=\"(prefers-color-scheme: dark)\">     <img src=\"https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg\" alt=\"Leptos Logo\"> </picture>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:sass": "sass style/main.scss style/main.css",
+    "watch:sass": "sass --watch style/main.scss style/main.css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,10 @@
+/*  
+  Content-Type: text/html
+/style/*.css  
+  Content-Type: text/css
+
+/pkg/*.js
+  Content-Type: application/javascript
+
+/pkg/*.wasm
+  Content-Type: application/wasm

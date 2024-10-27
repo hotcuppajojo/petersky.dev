@@ -1,0 +1,9 @@
+[build]
+dist = "target/site"  # Main output directory for static assets
+
+[scss]
+source = "style/main.scss"
+output = "style/main.css"
+
+[watch]
+paths = ["src", "assets", "style"]

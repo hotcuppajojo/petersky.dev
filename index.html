@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoJo Petersky Dev</title>
+    <link rel="stylesheet" href="/style/main.css">
+    
+<script type="module" nonce="R6m4whvI9cZaYT0FOo3HIg==">
+import init, * as bindings from '/petersky-dev-14d8bada0cf12ff1.js';
+const wasm = await init('/petersky-dev-14d8bada0cf12ff1_bg.wasm');
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+<link rel="modulepreload" href="/petersky-dev-14d8bada0cf12ff1.js" crossorigin=anonymous integrity="sha384-cFUegYwH1BACHvAwIUZKLuLEm9+1CCaSmwKppeKx2AmNSGTM+AzvTcNrZynNQRWo"><link rel="preload" href="/petersky-dev-14d8bada0cf12ff1_bg.wasm" crossorigin=anonymous integrity="sha384-cSNJjrHJ2Ur62nQrU9HJyL15bIOsFdKSRctobd9QKgH5RvGruil7piuM5is5HeWW" as="fetch" type="application/wasm"></head>
+<body>
+    <div id="site-viewport">
+        <header>
+            <h1 class="neon-text">JoJo Petersky Dev</h1>
+            <nav>
+                <ul>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/posts">Blog</a></li>
+                    <li><a href="/portfolio">Portfolio</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="hero">
+                <div class="hero-content">
+                    <h2>Welcome to My Cyberpunk World</h2>
+                    <p>Explore my journey in software engineering, web development, and cutting-edge tech.</p>
+                </div>
+            </section>
+    
+            <section class="recent-posts">
+                <h3>Recent Posts</h3>
+                <div class="posts-grid">
+                    <article class="post-card">
+                        <h4>My Latest Project</h4>
+                        <p>A dive into my recent work on automated vision testing.</p>
+                    </article>
+                    <article class="post-card">
+                        <h4>Creating a Cyberpunk UI</h4>
+                        <p>How I achieved a futuristic look and feel with modern web tools.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p>© 2024 JoJo Petersky | Built with <a href="https://leptos.dev">Leptos</a></p>
+                <div class="social-links">
+                    <a href="#"><img src="/assets/icons/github.svg" alt="GitHub"></a>
+                    <a href="#"><img src="/assets/icons/linkedin.svg" alt="LinkedIn"></a>
+                    <a href="#"><img src="/assets/icons/twitter.svg" alt="Twitter"></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script type="module">
+        import init from './pkg/petersky-dev.js';
+        init().then(() => {
+            console.log("Leptos app initialized");
+        });
+    </script>
+</body>
+</html>

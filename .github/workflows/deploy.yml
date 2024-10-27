@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Leptos CLI
         if: steps.leptos-cache.outputs.cache-hit != 'true'
-        run: cargo install --locked cargo-leptos
+        run: cargo install --force --locked cargo-leptos
 
       - name: Cache Trunk
         id: trunk-cache

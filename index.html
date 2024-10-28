@@ -6,52 +6,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JoJo Petersky Dev</title>
     <link rel="stylesheet" href="/style/main.css">
-    <link data-trunk rel="rust" data-bin="petersky-dev" />
 </head>
 <body>
     <div id="site-viewport">
         <header>
-            <h1 class="neon-text">JoJo Petersky Dev</h1>
-            <nav>
-                <ul>
-                    <li><a href="/about">About</a></li>
-                    <li><a href="/posts">Blog</a></li>
-                    <li><a href="/portfolio">Portfolio</a></li>
-                </ul>
-            </nav>
+            <div class="header-content">
+                <h1 class="neon-text">JoJo Petersky Dev</h1>
+                <nav>
+                    <ul>
+                        <li><a href="#about" class="nav-link" data-text="About">About</a></li>
+                        <li><a href="#skills" class="nav-link" data-text="Skills">Skills</a></li>
+                        <li><a href="#experience" class="nav-link" data-text="Experience">Experience</a></li>
+                        <li><a href="#projects" class="nav-link" data-text="Projects">Projects</a></li>
+                        <li><a href="#contact" class="nav-link" data-text="Contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
         </header>
         
         <main>
-            <section class="hero">
+            <!-- Introduction Section -->
+            <section id="about" class="hero">
                 <div class="hero-content">
                     <h2>Welcome to My Cyberpunk World</h2>
-                    <p>Explore my journey in software engineering, web development, and cutting-edge tech.</p>
+                    <p>I'm JoJo Petersky, an Undergraduate Researcher specializing in VR/AR systems, HCI, and immersive experience design. I leverage my skills in programming, simulation, and virtual reality to create real-world solutions for education, entertainment, and social impact.</p>
                 </div>
             </section>
-    
-            <section class="recent-posts">
-                <h3>Recent Posts</h3>
+
+            <!-- Skills Section -->
+            <section id="skills" class="skills-section">
+                <h3 class="section-title">Skills</h3>
+                <div class="skills-grid">
+                    <div class="skill-item">C++</div>
+                    <div class="skill-item">Python</div>
+                    <div class="skill-item">Java</div>
+                    <div class="skill-item">JavaScript</div>
+                    <div class="skill-item">SQL</div>
+                    <div class="skill-item">Unity</div>
+                    <div class="skill-item">Unreal Engine</div>
+                    <div class="skill-item">3D Modeling & CAD</div>
+                    <div class="skill-item">Project Management</div>
+                </div>
+            </section>
+
+            <!-- Experience Section -->
+            <section id="experience" class="experience-section">
+                <h3 class="section-title">Experience</h3>
+                <div class="experience-timeline">
+                    <div class="experience-item">
+                        <h4>Undergraduate Researcher</h4>
+                        <p>University of Nevada, Reno (Sep 2023 - Present)</p>
+                        <p>Developing novel vision test applications in virtual reality environments for the Human-Machine Perception Lab under Dr. Alireza Tavakkoli.</p>
+                    </div>
+                    <div class="experience-item">
+                        <h4>Modeling Engineer</h4>
+                        <p>PCC Structurals, Carson City, NV (Aug 2014 - Apr 2020)</p>
+                        <p>Root Cause Analysis, CAD design, fixture design, and training in 3D technologies.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects" class="projects-section">
+                <h3 class="section-title">Projects</h3>
                 <div class="posts-grid">
                     <article class="post-card">
-                        <h4>My Latest Project</h4>
-                        <p>A dive into my recent work on automated vision testing.</p>
+                        <h4>Novel Vision Test Applications</h4>
+                        <p>Creating immersive virtual reality-based vision test solutions at UNR's Human-Machine Perception Lab.</p>
                     </article>
                     <article class="post-card">
-                        <h4>Creating a Cyberpunk UI</h4>
-                        <p>How I achieved a futuristic look and feel with modern web tools.</p>
+                        <h4>3D Lab for Fixturing and Prototype Systems</h4>
+                        <p>Established a 3D lab for rapid prototyping at PCC Structurals, using additive manufacturing and CAD.</p>
                     </article>
                 </div>
             </section>
         </main>
-        
-        <footer class="site-footer">
+
+        <!-- Contact Section -->
+        <footer id="contact" class="site-footer">
             <div class="footer-content">
-                <p>© 2024 JoJo Petersky | Built with <a href="https://leptos.dev">Leptos</a></p>
+                <h3>Contact Me</h3>
+                <p>Let's connect and discuss how we can bring immersive experiences to life.</p>
                 <div class="social-links">
-                    <a href="#"><img src="/assets/icons/github.svg" alt="GitHub"></a>
-                    <a href="#"><img src="/assets/icons/linkedin.svg" alt="LinkedIn"></a>
-                    <a href="#"><img src="/assets/icons/twitter.svg" alt="Twitter"></a>
+                    <a href="https://github.com/hotcuppajojo"><img src="/assets/icons/github.svg" alt="GitHub"></a>
+                    <a href="https://linkedin.com/in/joann-petersky"><img src="/assets/icons/linkedin.svg" alt="LinkedIn"></a>
+                    <a href="https://twitter.com/jojo_petersky"><img src="/assets/icons/twitter.svg" alt="Twitter"></a>
                 </div>
+                <p>© 2024 JoJo Petersky | Built with <a href="https://leptos.dev">Leptos</a></p>
             </div>
         </footer>
     </div>

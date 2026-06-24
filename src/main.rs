@@ -1,3 +1,8 @@
+// keep this wildcard import even though rust marks it as unused
+// workaround for trunk/wasm-bindgen `clone_ref` intrinsic emission issue
+#[allow(unused_imports)]
+use web_sys::*;
+
 #[cfg(feature = "ssr")]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -9,7 +14,7 @@ async fn main() -> std::io::Result<()> {
 
     let conf = get_configuration(None).await.unwrap();
     let addr = conf.leptos_options.site_addr;
-    // Generate the list of routes in your Leptos App
+    // generate canonical route table so server render and client hydrate share identical routes
     let routes = generate_route_list(App);
     println!("listening on http://{}", &addr);
 
@@ -18,11 +23,11 @@ async fn main() -> std::io::Result<()> {
         let site_root = &leptos_options.site_root;
 
         App::new()
-            // serve JS/WASM/CSS from `pkg`
+            // serve compiled frontend artifacts from the expected deploy output for predictable paths and caching
             .service(Files::new("/pkg", format!("{site_root}/pkg")))
-            // serve other assets from the `assets` directory
+            // expose static assets from the site root so hosting and cdn rules apply consistently
             .service(Files::new("/assets", site_root))
-            // serve the favicon from /favicon.ico
+            // serve favicon from site root for consistent origin and cache control
             .service(favicon)
             .leptos_routes(leptos_options.to_owned(), routes.to_owned(), App)
             .app_data(web::Data::new(leptos_options.to_owned()))
@@ -47,20 +52,20 @@ async fn favicon(
 
 #[cfg(not(any(feature = "ssr", feature = "csr")))]
 pub fn main() {
-    // no client-side main function
-    // unless we want this to work with e.g., Trunk for pure client-side testing
-    // see lib.rs for hydration function instead
-    // see optional feature `csr` instead
+    // omit client runtime when not building ssr or csr to avoid shipping wasm
 }
 
 #[cfg(all(not(feature = "ssr"), feature = "csr"))]
 pub fn main() {
-    // a client-side main function is required for using `trunk serve`
-    // prefer using `cargo leptos serve` instead
-    // to run: `trunk serve --open --features csr`
+    // provide a browser-only entrypoint for static deployments and trunk workflows
     use petersky_dev::app::*;
 
+    // enable panic hook to surface browser-side errors for observability
     console_error_panic_hook::set_once();
 
-    leptos::mount_to_body(App);
+    // keep a concrete `web_sys` call alongside the wildcard import so generated wasm includes intrinsics expected by trunk's wasm-bindgen step
+    let _ = web_sys::window();
+
+    // mount the app for client-side hydration and interactivity
+    leptos::mount::mount_to_body(App);
 }

@@ -1,37 +1,40 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::{
+    components::{Route, Router, Routes},
+    path,
+};
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
+    // keep document-level metadata centralized so deployed pages stay consistent
     provide_meta_context();
 
     view! {
-        // injects a stylesheet into the document <head>
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
+        // load the compiled app stylesheet from the deploy output
+        // stable id preserves stylesheet identity across reloads for safe incremental deploys
         <Stylesheet id="leptos" href="/pkg/petersky-dev.css"/>
 
-        // sets the document title
-        <Title text="Welcome to Leptos"/>
+        // set default title used for seo and consistent metadata
+        <Title text="petersky.dev"/>
 
-        // content for this welcome page
+        // centralize routing so server render and client hydrate use identical route table
         <Router>
             <main>
-                <Routes>
-                    <Route path="" view=HomePage/>
-                    <Route path="/*any" view=NotFound/>
+                <Routes fallback=|| "Not Found.">
+                    <Route path=path!("") view=HomePage/>
+                    <Route path=path!("/*any") view=NotFound/>
                 </Routes>
             </main>
         </Router>
     }
 }
 
-/// Renders the home page of your application.
+/// page shell for verifying hydration and initial interactivity
 #[component]
 fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(0);
+    // keep state local to isolate component behavior and simplify hydration verification
+    let (count, set_count) = signal(0);
     let on_click = move |_| set_count.update(|count| *count += 1);
 
     view! {
@@ -43,16 +46,10 @@ fn HomePage() -> impl IntoView {
 /// 404 - Not Found
 #[component]
 fn NotFound() -> impl IntoView {
-    // set an HTTP status code 404
-    // this is feature gated because it can only be done during
-    // initial server-side rendering
-    // if you navigate to the 404 page subsequently, the status
-    // code will not be set because there is not a new HTTP request
-    // to the server
+    // set response status during initial server render to convey correct http semantics
     #[cfg(feature = "ssr")]
     {
-        // this can be done inline because it's synchronous
-        // if it were async, we'd use a server function
+        // operate synchronously on response context to avoid adding async server hooks
         let resp = expect_context::<leptos_actix::ResponseOptions>();
         resp.set_status(actix_web::http::StatusCode::NOT_FOUND);
     }

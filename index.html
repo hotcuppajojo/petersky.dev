@@ -1,9 +1,9 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <script type="module">
-import init, * as bindings from '/petersky-dev-d9f67f18658db20e.js';
-const wasm = await init({ module_or_path: '/petersky-dev-d9f67f18658db20e_bg.wasm' });
+import init, * as bindings from '/petersky-dev-f9aa06ccae861f10.js';
+const wasm = await init({ module_or_path: '/petersky-dev-f9aa06ccae861f10_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -18,7 +18,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JoJo Petersky Dev</title>
     <link rel="stylesheet" href="/style/main.css">
-<link rel="modulepreload" href="/petersky-dev-d9f67f18658db20e.js" crossorigin="anonymous" integrity="sha384-cFUegYwH1BACHvAwIUZKLuLEm9+1CCaSmwKppeKx2AmNSGTM+AzvTcNrZynNQRWo"><link rel="preload" href="/petersky-dev-d9f67f18658db20e_bg.wasm" crossorigin="anonymous" integrity="sha384-3uGjwjhjfGnd0RwGCHfkTBIgPW0O8MM3x9h0E3UoSIhLbRm/2XlfTL+Hjc+jJiRS" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/petersky-dev-f9aa06ccae861f10.js" crossorigin="anonymous" integrity="sha384-a4f2Z+6SoqyVEP21ZJpoAh7omQWXbGBRAfY5BEV4gehRrJRmZSyutnoz1Og3l1Y/"><link rel="preload" href="/petersky-dev-f9aa06ccae861f10_bg.wasm" crossorigin="anonymous" integrity="sha384-MkzLvGAtRCkeztDU/4QP2VdiQDuLo/LoTmq5OrWOugZHhMn/E+v2oEeRfNvGIs8I" as="fetch" type="application/wasm"></head>
 <body>
     <div id="site-viewport">
         <div class="circuit-background"></div>
@@ -118,11 +118,5 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             </div>
         </footer>
     </div>
-    <script type="module">
-        import init from './pkg/petersky-dev.js';
-        init().then(() => {
-            console.log("Leptos app initialized");
-        });
-    </script>
 </body>
 </html>

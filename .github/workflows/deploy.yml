@@ -17,36 +17,64 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
+      - name: Verify Rust Toolchain
         run: |
-          rustup update stable
-          rustup component add rustfmt
-          rustup target add wasm32-unknown-unknown
+          rustup show
+          rustc --version
+          cargo --version
 
-      - name: Cache Cargo
+      - name: Resolve Trunk Version
+        id: trunk-version
+        run: |
+          version=$(cargo metadata --manifest-path tools/Cargo.toml --format-version=1 --locked \
+            | jq -r '.packages[] | select(.name == "trunk") | .version' \
+            | sort -V \
+            | tail -n 1)
+
+          if [ -z "$version" ]; then
+            echo "Trunk is not present in tools/Cargo.lock"
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Using trunk $version"
+
+      - name: Cache Cargo Registry and Build Output
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+            tools/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'tools/Cargo.lock', 'rust-toolchain.toml') }}
           restore-keys: |
             cargo-${{ runner.os }}-
 
-      - name: Install Trunk
+      - name: Cache Trunk Binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/trunk
+          key: trunk-${{ runner.os }}-${{ steps.trunk-version.outputs.version }}-${{ hashFiles('tools/Cargo.lock') }}
+
+      - name: Install Trunk if Needed
         run: |
-          if ! command -v trunk >/dev/null 2>&1; then
-            cargo install trunk --version 0.21.14 --locked
+          expected="${{ steps.trunk-version.outputs.version }}"
+          installed=$(trunk --version 2>/dev/null | awk '{print $2}' || true)
+
+          if [ "$installed" != "$expected" ]; then
+            cargo install trunk --version "$expected" --locked --force
           fi
+
+          trunk --version
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: npm
 
-      - name: Install npm dependencies
+      - name: Install npm Dependencies
         run: npm ci
 
       - name: Lint Rust Codebase
@@ -56,7 +84,7 @@ jobs:
         run: cargo test --release
 
       - name: Compile SCSS to CSS
-        run: npx sass style/main.scss style/main.css
+        run: npm run build:sass
 
       - name: Build Site with Trunk
         run: trunk build --release

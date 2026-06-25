@@ -26,13 +26,10 @@ jobs:
       - name: Resolve Trunk Version
         id: trunk-version
         run: |
-          version=$(cargo metadata --manifest-path tools/Cargo.toml --format-version=1 --locked \
-            | jq -r '.packages[] | select(.name == "trunk") | .version' \
-            | sort -V \
-            | tail -n 1)
+          version=$(tr -d '[:space:]' < tools/trunk.version)
 
           if [ -z "$version" ]; then
-            echo "Trunk is not present in tools/Cargo.lock"
+            echo "tools/trunk.version is empty"
             exit 1
           fi
 
@@ -55,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/trunk
-          key: trunk-${{ runner.os }}-${{ steps.trunk-version.outputs.version }}-${{ hashFiles('tools/Cargo.lock') }}
+          key: trunk-${{ runner.os }}-${{ steps.trunk-version.outputs.version }}-${{ hashFiles('tools/trunk.version') }}
 
       - name: Install Trunk if Needed
         run: |

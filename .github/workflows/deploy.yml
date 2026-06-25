@@ -17,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Verify Rust Toolchain
+      - name: Install and Verify Rust Toolchain
         run: |
           rustup show
           rustc --version
@@ -36,17 +36,10 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Using trunk $version"
 
-      - name: Cache Cargo Registry and Build Output
-        uses: actions/cache@v4
+      - name: Cache Rust Build Artifacts
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-            tools/target
-          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'tools/Cargo.lock', 'rust-toolchain.toml') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
+          shared-key: petersky-dev
 
       - name: Cache Trunk Binary
         uses: actions/cache@v4

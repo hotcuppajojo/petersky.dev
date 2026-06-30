@@ -11,7 +11,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Title text="JoJo Petersky Dev" />
+        <Title text="JoJo Petersky" />
         <Router>
             <Routes fallback=|| view! { <NotFound /> }>
                 <Route path=path!("") view=HomePage />

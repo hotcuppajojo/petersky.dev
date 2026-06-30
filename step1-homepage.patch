@@ -1,0 +1,148 @@
+--- /src/app.rs	2026-06-30 15:11:57.137921647 +0000
++++ /src/app.rs	2026-06-30 15:11:58.103856774 +0000
+@@ -28,61 +28,48 @@
+ 
+             <header class="site-header">
+                 <div class="header-content">
+-                    <a class="site-mark neon-text" href="#about" aria-label="JoJo Petersky Dev home">
++                    <a class="site-mark neon-text" href="#top" aria-label="JoJo Petersky Dev home">
+                         "JoJo Petersky Dev"
+                     </a>
+                     <nav aria-label="Primary navigation">
+                         <ul>
+                             <li><a href="#about" class="nav-link" data-text="About">"About"</a></li>
+-                            <li><a href="#skills" class="nav-link" data-text="Skills">"Skills"</a></li>
+-                            <li><a href="#experience" class="nav-link" data-text="Experience">"Experience"</a></li>
++                            <li><a href="#work" class="nav-link" data-text="Work">"Work"</a></li>
+                             <li><a href="#projects" class="nav-link" data-text="Projects">"Projects"</a></li>
++                            <li><a href="#notes" class="nav-link" data-text="Notes">"Notes"</a></li>
+                             <li><a href="#contact" class="nav-link" data-text="Contact">"Contact"</a></li>
+                         </ul>
+                     </nav>
+                 </div>
+             </header>
+ 
+-            <main>
++            <main id="top">
+                 <section id="about" class="hero">
+                     <div class="hero-content panel-corner">
+-                        <h1>"XR Research Developer"</h1>
++                        <p class="hero-kicker">"XR · Research Software · Simulation"</p>
++                        <h1>"I build immersive research tools for vision, perception, and simulation."</h1>
+                         <p>
+-                            "I’m JoJo Petersky, a software developer focused on XR/VR research systems,
+-                            immersive interfaces, eye-tracking workflows, simulation, and practical tools
+-                            for human-computer interaction."
++                            "I’m JoJo Petersky, a software developer with a background in XR research,
++                            Unreal Engine workflows, eye tracking, CAD, simulation, and aerospace manufacturing.
++                            I like building practical systems where software, hardware, data, and human perception overlap."
+                         </p>
+-                        <div class="hero-actions">
+-                            <a class="button" href="#projects">"View Projects"</a>
+-                            <a class="button button-secondary" href="#contact">"Contact"</a>
++                        <div class="hero-actions" aria-label="Primary links">
++                            <a class="button" href="#projects">"Selected Work"</a>
++                            <a class="button button-secondary" href="#work">"Experience"</a>
++                            <a class="button" href="https://github.com/hotcuppajojo">"GitHub"</a>
++                        </div>
++                        <div class="hero-proof" aria-label="Current focus areas">
++                            <span>"Currently: XR vision-testing research"</span>
++                            <span>"Building with: Leptos · Rust · Unreal"</span>
++                            <span>"Background: aerospace simulation + prototyping"</span>
+                         </div>
+                     </div>
+                 </section>
+ 
+                 <div class="section-divider"></div>
+ 
+-                <section id="skills" class="skills-section">
+-                    <h2 class="section-title">"Skills"</h2>
+-                    <div class="skills-grid">
+-                        <div class="skill-item">"Rust"</div>
+-                        <div class="skill-item">"C++"</div>
+-                        <div class="skill-item">"Python"</div>
+-                        <div class="skill-item">"Unreal Engine"</div>
+-                        <div class="skill-item">"Unity"</div>
+-                        <div class="skill-item">"XR / VR"</div>
+-                        <div class="skill-item">"Eye Tracking"</div>
+-                        <div class="skill-item">"HCI"</div>
+-                        <div class="skill-item">"3D CAD"</div>
+-                        <div class="skill-item">"Simulation"</div>
+-                        <div class="skill-item">"Web Dev"</div>
+-                        <div class="skill-item">"Research Software"</div>
+-                    </div>
+-                </section>
+-
+-                <div class="section-divider"></div>
+-
+-                <section id="experience" class="experience-section">
+-                    <h2 class="section-title">"Experience"</h2>
++                <section id="work" class="experience-section">
++                    <h2 class="section-title">"Work"</h2>
+                     <div class="experience-timeline">
+                         <article class="experience-item panel-corner">
+                             <h3>"Undergraduate Research Engineer"</h3>
+@@ -108,8 +95,24 @@
+ 
+                 <div class="section-divider"></div>
+ 
++                <section id="skills" class="skills-section">
++                    <h2 class="section-title">"Focus Areas"</h2>
++                    <div class="skills-grid">
++                        <div class="skill-item">"XR / VR"</div>
++                        <div class="skill-item">"Research Software"</div>
++                        <div class="skill-item">"Eye Tracking"</div>
++                        <div class="skill-item">"Unreal Engine"</div>
++                        <div class="skill-item">"Rust"</div>
++                        <div class="skill-item">"C++"</div>
++                        <div class="skill-item">"Python"</div>
++                        <div class="skill-item">"Simulation"</div>
++                    </div>
++                </section>
++
++                <div class="section-divider"></div>
++
+                 <section id="projects" class="projects-section">
+-                    <h2 class="section-title">"Projects"</h2>
++                    <h2 class="section-title">"Selected Projects"</h2>
+                     <div class="posts-grid">
+                         <article class="post-card panel-corner">
+                             <h3>"VR Vision Testing"</h3>
+@@ -136,6 +139,29 @@
+                         </article>
+                     </div>
+                 </section>
++
++                <div class="section-divider"></div>
++
++                <section id="notes" class="projects-section">
++                    <h2 class="section-title">"Notes"</h2>
++                    <div class="posts-grid">
++                        <article class="post-card panel-corner">
++                            <h3>"Leptos Portfolio Rebuild"</h3>
++                            <p>
++                                "Build notes from migrating this site to Leptos 0.8, cleaning up Trunk, Sass,
++                                GitHub Pages deployment, and Rust toolchain control."
++                            </p>
++                        </article>
++
++                        <article class="post-card panel-corner">
++                            <h3>"XR Research Architecture"</h3>
++                            <p>
++                                "A future writeup on headset workflows, eye tracking, adaptive test logic,
++                                and structured data export for immersive experiments."
++                            </p>
++                        </article>
++                    </div>
++                </section>
+             </main>
+ 
+             <footer id="contact" class="site-footer">
+@@ -153,7 +179,6 @@
+         </div>
+     }
+ }
+-
+ #[component]
+ fn NotFound() -> impl IntoView {
+     #[cfg(feature = "ssr")]

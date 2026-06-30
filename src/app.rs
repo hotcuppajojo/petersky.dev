@@ -29,7 +29,7 @@ fn HomePage() -> impl IntoView {
             <header class="site-header">
                 <div class="header-content">
                     <a class="site-mark neon-text" href="#top" aria-label="JoJo Petersky Dev home">
-                        "JoJo Petersky Dev"
+                        "JoJo Petersky"
                     </a>
                     <nav aria-label="Primary navigation">
                         <ul>
@@ -50,9 +50,7 @@ fn HomePage() -> impl IntoView {
                         <p class="hero-kicker">"XR · Research Software · Simulation"</p>
                         <h1>"Immersive research tools for vision, perception, and simulation."</h1>
                         <p>
-                            "I work across Unreal Engine, headset workflows, eye tracking, adaptive test logic,
-                            structured data export, CAD, and simulation to build practical systems where software,
-                            hardware, data, and human perception overlap."
+                            "I enjoy building software systems that connect research, engineering, and real-world users. My work spans XR research software, simulation, computer vision, experimental tooling, and developer infrastructure. Before returning to school for computer science, I spent nearly a decade solving manufacturing engineering problems in aerospace, giving me an appreciation for building reliable systems that people depend on."
                         </p>
                         <div class="hero-actions" aria-label="Primary links">
                             <a class="button" href="#projects">"Selected Work"</a>
